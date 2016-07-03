@@ -1,0 +1,15 @@
+# exclude all
+/*
+
+# project structure
+!/src/
+!/dist/
+!/etc/
+!/docs/
+!/test/
+
+# project files
+!.gitignore
+!README.md
+!package.json
+!LICENSE
