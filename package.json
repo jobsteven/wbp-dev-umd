@@ -9,7 +9,7 @@
   "description": "a wbp pluign used to develop and debug process on UMD project.",
   "author": "AlexWang <1669499355@qq.com>",
   "name": "wbp-dev-umd",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "homepage": "https://github.com/AlexWang1987/wbp-dev-umd#readme",
   "keywords": [
