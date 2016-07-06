@@ -30,11 +30,14 @@
     "babel-preset-react": "^6.11.1",
     "babel-preset-react-hmre": "^1.1.1",
     "bluebird": "^3.4.1",
+    "express": "^4.14.0",
+    "html-webpack-plugin": "^2.22.0",
     "promisify-fs": "^1.0.35",
     "react": "^15.2.0",
     "react-dom": "^15.2.0",
     "react-lite": "^0.15.14",
     "webpack": "^1.13.1",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-middleware": "^1.6.1",
+    "webpack-hot-middleware": "^2.12.0"
   }
 }

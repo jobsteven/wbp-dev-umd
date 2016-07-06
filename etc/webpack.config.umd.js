@@ -17,19 +17,17 @@ module.exports = {
    */
   addBundleEntry: function addBundleEntry(bundleName, bundleEntry) {
     //websocket2DevServer(devServerClient) & webpackHotClient(webpack hot handler)
-    var websocket2DevServer = require.resolve('webpack-dev-server/client') + '?http://' +
-      this.devServer.host + ':' +
-      this.devServer.port + '/';
-
-    var webpackHotClient = require.resolve('webpack/hot/only-dev-server');
+    // var websocket2DevServer = require.resolve('webpack-dev-server/client') + '?http://' + this.devServer.host + ':' + this.devServer.port + '/';
+    // var webpackHotClient = require.resolve('webpack/hot/only-dev-server');
+    var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?quiet=true';
 
     var entryType = bundleEntry.constructor.name.toLowerCase();
     switch (entryType) {
     case 'string':
-      bundleEntry = [websocket2DevServer, webpackHotClient, bundleEntry];
+      bundleEntry = [webpackHotClient, bundleEntry];
       break;
     case 'array':
-      bundleEntry.unshift(websocket2DevServer, webpackHotClient);
+      bundleEntry.unshift(webpackHotClient);
       break;
     default:
       cx.warning('The type of bundleEntry is not supported yet.');
@@ -39,6 +37,7 @@ module.exports = {
   },
   output: {
     filename: '[name].js',
+    publicPath: '/'
   },
   /**
    * setBuildPath
@@ -47,6 +46,14 @@ module.exports = {
   setBuildPath: function setBuildPath(buildPath) {
     this.output.path = buildPath;
   },
+  /**
+   * @method setPublicPath
+   * @param  {string}      publicPath
+   */
+  setPublicPath: function setPublicPath(publicPath) {
+    this.output.publicPath = publicPath;
+  },
+
   module: {
     loaders: [],
     noParse: []
@@ -105,8 +112,7 @@ module.exports = {
   },
   devServer: {
     host: 'localhost',
-    port: 8080,
-    contentBase: '/',
+    port: 8080
   },
   /**
    * setDevServer local modification support
