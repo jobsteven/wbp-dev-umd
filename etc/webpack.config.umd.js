@@ -9,35 +9,57 @@ module.exports = {
   setContext: function setContext(contextPath) {
     this.context = contextPath;
   },
-  entry: {},
+  entry: {
+    vendor: []
+  },
   /**
    * addBundleEntry
    * @param {string} bundleName
    * @param {string/array} bundleEntry
    */
   addBundleEntry: function addBundleEntry(bundleName, bundleEntry) {
-    //websocket2DevServer(devServerClient) & webpackHotClient(webpack hot handler)
-    // var websocket2DevServer = require.resolve('webpack-dev-server/client') + '?http://' + this.devServer.host + ':' + this.devServer.port + '/';
-    // var webpackHotClient = require.resolve('webpack/hot/only-dev-server');
-    var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?quiet=true';
 
     var entryType = bundleEntry.constructor.name.toLowerCase();
     switch (entryType) {
     case 'string':
-      bundleEntry = [webpackHotClient, bundleEntry];
+      bundleEntry = [bundleEntry];
       break;
     case 'array':
-      bundleEntry.unshift(webpackHotClient);
       break;
     default:
       cx.warning('The type of bundleEntry is not supported yet.');
     }
-
     this.entry[bundleName] = bundleEntry;
+  },
+
+  /**
+   * @method addVendor
+   * @param vendor module name or absolute path
+   */
+  addVendor: function (vendor) {
+    if (vendor) {
+      var valueType = vendor.constructor.name.toLowerCase();
+
+      if (valueType == 'string') {
+        this.entry.vendor.push(vendor);
+      }
+      if (valueType == 'array') {
+        this.entry.vendor = this.entry.vendor.concat(vendor);
+      }
+    }
   },
   output: {
     filename: '[name].js',
-    publicPath: '/'
+    publicPath: '/',
+    libraryTarget: 'umd',
+    library: ''
+  },
+  /**
+   * @method setUMDName
+   * @param  {[type]}   libraryName [description]
+   */
+  setExportedName: function (libraryName) {
+    this.output.library = libraryName;
   },
   /**
    * setBuildPath
@@ -123,5 +145,15 @@ module.exports = {
     this.devServer.host = host || 'localhost';
     this.devServer.port = port || 8080;
   },
+
+  /**
+   * @method enableHotReplacement
+   */
+  enableHotReplacement: function (entryName) {
+    var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';
+    var entryBundle = this.entry[entryName];
+    if (entryBundle)
+      entryBundle.unshift(webpackHotClient);
+  }
 };
 
