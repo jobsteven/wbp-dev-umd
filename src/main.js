@@ -80,7 +80,8 @@ function getWebpackCompiler() {
       cx.__sourcedir = cx.getCwdPath(umdConf.pkg.wbp.source || './src');
       cx.__builddir = cx.getCwdPath(umdConf.pkg.wbp.build || './dist');
       cx.__cwdDependencesDir = cx.__cwd + '/node_modules';
-      cx.__pluginDependencesDir = cx.__plugindir + '/node_modules';
+      cx.__homeDependenceDir = cx.__home + '/node_modules';
+      cx.__pluginDependencesDir = cx.__plugin_dir + '/node_modules';
 
       //default umd settings
       umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
@@ -102,8 +103,10 @@ function getWebpackCompiler() {
       umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx));
       umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx));
 
+      umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
       umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
       umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
+
       umdConf.addModuleSearchPath(cx.__sourcedir);
 
       //umd settings used to resolve entry bunble.
