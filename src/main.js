@@ -17,7 +17,7 @@ var context, cx;
 
 /**
  * wbp plugin context (cx)
- * @param {string}  __plugindir  plugin's absolute path
+ * @param {string}  __plugin_dir  plugin's absolute path
  * @param {string}  __cwd        working directory
  * @param {string}  __name       current plugin's name
  * @param {string}  info         utils log info
@@ -72,7 +72,7 @@ function getWebpackCompiler() {
   return fs
     .readJSON(cx.getCwdPath('./package.json'))
     .then(function (pkg) {
-      var umdConf = require(cx.__plugindir + '/etc/webpack.config.umd.js');
+      var umdConf = require(cx.__plugin_dir + '/etc/webpack.config.umd.js');
       umdConf.pkg = pkg;
       umdConf.webpackLoaders = webpackLoaders;
 
@@ -95,7 +95,7 @@ function getWebpackCompiler() {
       umdConf.setExportedName(umdConf.pkg.name);
       umdConf.addPlugin(new HTMLWebpackPlugin({
         filename: 'index.html',
-        template: cx.__plugindir + '/etc/umd.template.html'
+        template: cx.__plugin_dir + '/etc/umd.template.html'
       }));
 
       umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx));
