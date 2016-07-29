@@ -57,7 +57,6 @@ function startWebpackCompiler() {
  * @return {[type]}
  */
 function startDevServer() {
-  console.log(expressServer._router.stack);
   //start dev server
   return expressServer.listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function () {
     cx.info('DevServer: ' + cx.umdConf.devServer.host + ':' + cx.umdConf.devServer.port + ' ');
