@@ -114,7 +114,7 @@ function getWebpackCompiler() {
 
       //addEntires
       for (var key in umdConf.pkg.wbp.entries) {
-        umdConf.addBundleEntry(key, cx.getCwdPath(umdConf.pkg.wbp.entries[key]));
+        umdConf.addBundleEntry(key, umdConf.pkg.wbp.entries[key]);
       }
 
       //local setting support
