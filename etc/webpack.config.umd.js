@@ -114,6 +114,15 @@ module.exports = {
   addModuleAlias: function (source, alias) {
     this.resolve.alias[source] = alias;
   },
+  externals: [],
+  /**
+   * @method addExternal
+   * @param  external // string,object,function,RegExp,array
+   * http://webpack.github.io/docs/configuration.html#externals
+   */
+  addExternal: function (external) {
+    this.externals.push(external);
+  },
   resolveLoader: {
     root: []
   },
