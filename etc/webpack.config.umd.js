@@ -151,7 +151,7 @@ module.exports = {
    */
   enableHotReplacement: function (entryName) {
     var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';
-    var entryBundle = this.entry[entryName];
+    var entryBundle = this.entry[entryName || 'main'];
     if (entryBundle)
       entryBundle.unshift(webpackHotClient);
   }
