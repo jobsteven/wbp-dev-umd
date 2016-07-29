@@ -106,8 +106,8 @@ function getWebpackCompiler() {
       umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
       umdConf.addModuleSearchPath(cx.__sourcedir);
 
-      //umd settings
-      umdConf.setContext(cx.__cwd);
+      //umd settings used to resolve entry bunble.
+      umdConf.setContext(cx.__sourcedir);
 
       //umd build path
       umdConf.setBuildPath(cx.__builddir);
