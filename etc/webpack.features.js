@@ -1,3 +1,4 @@
+/*eslint-disable*/
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = function (cx, umdConf) {
