@@ -6,7 +6,7 @@ var getWebpackHotMiddleware = require('webpack-hot-middleware');
 var HTMLWebpackPlugin = require('html-webpack-plugin');
 var fs = require('promisify-fs');
 var webpackLoaders = require('../etc/webpack.loaders.js');
-var webpackFeatures = require('../ect/webpack.features.js');
+var webpackFeatures = require('../etc/webpack.features.js');
 var path = require('path');
 var Promise = require('bluebird');
 
