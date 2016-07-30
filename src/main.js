@@ -91,10 +91,6 @@ function getWebpackCompiler() {
         names: ['vendor']
       }));
       umdConf.setExportedName(umdConf.pkg.name);
-      umdConf.addPlugin(new HTMLWebpackPlugin({
-        filename: 'index.html',
-        template: cx.getCwdPath('./etc/umd.template.html')
-      }));
 
       umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx));
       umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx));
