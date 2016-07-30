@@ -1,6 +1,7 @@
 /*eslint-disable*/
 var webpack = require('webpack');
-var expressServer = require('express')();
+var express = require('express');
+var expressServer = express();
 var getWebpackDevMiddleware = require('webpack-dev-middleware');
 var getWebpackHotMiddleware = require('webpack-hot-middleware');
 var HTMLWebpackPlugin = require('html-webpack-plugin');
@@ -170,6 +171,7 @@ function mountWebpackMiddles() {
     expressServer.get('favicon.ico', function (req, res) {
       res.end();
     })
+    expressServer.use(express.static(cx.__builddir));
   });
 }
 
