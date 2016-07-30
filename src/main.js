@@ -3,10 +3,10 @@ var webpack = require('webpack');
 var expressServer = require('express')();
 var getWebpackDevMiddleware = require('webpack-dev-middleware');
 var getWebpackHotMiddleware = require('webpack-hot-middleware');
-var CleanWebpackPlugin = require('clean-webpack-plugin');
 var HTMLWebpackPlugin = require('html-webpack-plugin');
 var fs = require('promisify-fs');
 var webpackLoaders = require('../etc/webpack.loaders.js');
+var webpackFeatures = require('../ect/webpack.features.js');
 var path = require('path');
 var Promise = require('bluebird');
 
@@ -75,6 +75,7 @@ function getWebpackCompiler() {
       var umdConf = require(cx.__plugin_dir + '/etc/webpack.config.umd.js');
       umdConf.pkg = pkg;
       umdConf.webpackLoaders = webpackLoaders;
+      umdConf.webpackFeatures = webpackFeatures(cx, umdConf);
 
       //project paths
       cx.__sourcedir = cx.getCwdPath(umdConf.pkg.wbp.source || './src');
@@ -89,9 +90,6 @@ function getWebpackCompiler() {
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin({
         names: ['vendor']
       }));
-      umdConf.addPlugin(new CleanWebpackPlugin([cx.__builddir], {
-        root: cx.__cwd
-      }))
       umdConf.setExportedName(umdConf.pkg.name);
       umdConf.addPlugin(new HTMLWebpackPlugin({
         filename: 'index.html',
