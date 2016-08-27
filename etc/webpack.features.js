@@ -33,13 +33,13 @@ module.exports = function (cx, umdConf) {
 
     enableEntryHot: function (entryName) {
       var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';
-      var entryBundle = this.entry[entryName || 'main'];
+      var entryBundle = umdConf.entry[entryName || 'main'];
       if (entryBundle)
         entryBundle.unshift(webpackHotClient);
     },
 
     enableUglifyJs: function (options) {
-      var mergeOptions = Object.assign({}, { sourceMap: false }, options)
+      var mergeOptions = Object.assign({}, { sourceMap: false, comments: false }, options)
       umdConf.addPlugin(new webpack.optimize.UglifyJsPlugin(mergeOptions))
     },
 
