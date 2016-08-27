@@ -13,7 +13,17 @@ module.exports = function (cx, umdConf) {
     enableEntryHTML: function (options) {
       var mergeOptions = Object.assign({}, {
         filename: 'index.html',
-        template: cx.getCwdPath('./etc/umd.template.html')
+        template: cx.getCwdPath('./etc/umd.template.html'),
+        minify: {
+          preserveLineBreaks: false,
+          collapseWhitespace: true,
+          collapseInlineTagWhitespace: true,
+          minifyCSS: true,
+          minifyJS: true,
+          quoteCharacter: '"',
+          removeComments: true
+        },
+        hash: true
       }, options);
       umdConf.addPlugin(new HTMLWebpackPlugin(mergeOptions));
     },
