@@ -155,16 +155,6 @@ module.exports = {
   setDevServer: function setDevServer(host, port) {
     this.devServer.host = host || 'localhost';
     this.devServer.port = port || 8080;
-  },
-
-  /**
-   * @method enableHotReplacement
-   */
-  enableHotReplacement: function (entryName) {
-    var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';
-    var entryBundle = this.entry[entryName || 'main'];
-    if (entryBundle)
-      entryBundle.unshift(webpackHotClient);
   }
 };
 
