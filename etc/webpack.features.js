@@ -2,6 +2,7 @@
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 var HTMLWebpackPlugin = require('html-webpack-plugin');
 var OfflinePlugin = require('offline-plugin');
+var webpack = require('webpack');
 
 module.exports = function (cx, umdConf) {
   return {
