@@ -28,16 +28,20 @@ var context, cx;
  */
 module.exports = function main(params, options) {
   context = cx = this;
-  return getWebpackCompiler()
+  // development/production
+  var devMode = !(options['p'] || options['production']);
+  return getWebpackCompiler(devMode)
     .then(function () {
-      if (options['o'] || options['output']) {
+      //devMode / proMode output
+      if (options['d'] || options['developemnt'] || options['p'] || options['production']) {
         return startWebpackCompiler();
-      } else {
-        return mountWebpackMiddles()
-          .then(function () {
-            return startDevServer();
-          })
       }
+
+      // live developemnt
+      return mountWebpackMiddles()
+        .then(function () {
+          return startDevServer();
+        })
     })
     .then(function (finalstate) {
       cx.info('webpack compilation is done, successfully.');
@@ -69,12 +73,13 @@ function startDevServer() {
  * @method getWebpackCompiler
  * @return {[type]}
  */
-function getWebpackCompiler() {
+function getWebpackCompiler(devMode) {
   return fs
     .readJSON(cx.getCwdPath('./package.json'))
     .then(function (pkg) {
       var umdConf = require(cx.__plugin_dir + '/etc/webpack.config.umd.js');
       umdConf.pkg = pkg;
+      umdConf.devMode = devMode;
       umdConf.webpackLoaders = webpackLoaders;
       umdConf.webpackFeatures = webpackFeatures(cx, umdConf);
 
@@ -86,42 +91,44 @@ function getWebpackCompiler() {
       cx.__pluginDependencesDir = cx.__plugin_dir + '/node_modules';
 
       //default umd settings
-      umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
-      umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin());
-      umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin({
-        names: ['vendor']
-      }));
-      umdConf.setExportedName(umdConf.pkg.name);
+      if (devMode) {
+        umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
+      } else {
+        umdConf.addPlugin(new webpack.DedupePlugin());
+        umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin(true));
+      }
 
+      //Add Loaders Search Paths
+      umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
+      umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
+      umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
+
+      // Add Module Loaders
       umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx));
       umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx));
       umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx));
       umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx));
 
-      umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
-      umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
-      umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
-
+      //Add Module Search Paths
       umdConf.addModuleSearchPath(cx.__sourcedir);
 
-      //umd settings used to resolve entry bunble.
+      //ResolveEntryModules
       umdConf.setContext(cx.__sourcedir);
-
-      //umd build path
+      umdConf.setExportedName(umdConf.pkg.name);
       umdConf.setBuildPath(cx.__builddir);
 
-      //addEntires
+      //UMD Project Entries
       for (var key in umdConf.pkg.wbp.entries) {
         umdConf.addBundleEntry(key, umdConf.pkg.wbp.entries[key]);
       }
 
-      //local setting support
+      // Local Webpack Settings
       getLocalWebpackConfig(umdConf);
 
-      //create webpack compiler
+      // Create Webpack Compiler
       cx.webpackCompiler = webpack(umdConf);
 
-      //expose
+      // Expose umdConfig
       cx.umdConf = umdConf;
     })
 }
@@ -154,8 +161,6 @@ function mountWebpackMiddles() {
   return Promise.try(function () {
     var webpackHotMiddleware = getWebpackHotMiddleware(cx.webpackCompiler);
     var webpackDevMiddleware = getWebpackDevMiddleware(cx.webpackCompiler, {
-      // noInfo: true,
-      // quiet: true,
       contentBase: cx.umdConf.output.path,
       publicPath: cx.umdConf.output.publicPath,
       watchOptions: {

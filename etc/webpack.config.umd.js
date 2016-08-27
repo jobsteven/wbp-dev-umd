@@ -9,9 +9,7 @@ module.exports = {
   setContext: function setContext(contextPath) {
     this.context = contextPath;
   },
-  entry: {
-    vendor: []
-  },
+  entry: {},
   /**
    * addBundleEntry
    * @param {string} bundleName
@@ -37,15 +35,19 @@ module.exports = {
    * @param vendor module name or absolute path
    */
   addVendor: function (vendor) {
-    if (vendor) {
-      var valueType = vendor.constructor.name.toLowerCase();
+    if (this.entry['vendor']) {
+      if (vendor) {
+        var valueType = vendor.constructor.name.toLowerCase();
 
-      if (valueType == 'string') {
-        this.entry.vendor.push(vendor);
+        if (valueType == 'string') {
+          this.entry.vendor.push(vendor);
+        }
+        if (valueType == 'array') {
+          this.entry.vendor = this.entry.vendor.concat(vendor);
+        }
       }
-      if (valueType == 'array') {
-        this.entry.vendor = this.entry.vendor.concat(vendor);
-      }
+    } else {
+      console.warn('Please enable vendors configuration.');
     }
   },
   output: {
