@@ -1,24 +1,25 @@
 /*eslint-disable*/
+var combineLoader = require('combineLoader');
+
 /*WEBPACK COMMON LOADERS*/
 module.exports = {
   getJSLoader: function (cx) {
     return {
       test: /\.jsx?$/,
-      loader: 'babel-loader',
       include: cx.__sourcedir,
-      query: {
-        cacheDirectory: true,
-        presets: [
-          require.resolve('babel-preset-es2015'),
-          require.resolve('babel-preset-react'),
-        ],
-        "env": {
-          "development": {
-            "presets": [require.resolve('babel-preset-react-hmre')]
-          }
+      loader: combineLoader([{
+        loader: 'react-hot'
+      }, {
+        loader: 'babel-loader',
+        query: {
+          cacheDirectory: true,
+          presets: [
+            require.resolve('babel-preset-es2015'),
+            require.resolve('babel-preset-react'),
+          ]
         }
-      },
-    };
+      }])
+    }
   },
   getImgLoader: function (cx) {
     return {
