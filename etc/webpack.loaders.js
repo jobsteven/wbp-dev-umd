@@ -9,8 +9,8 @@ module.exports = {
       query: {
         cacheDirectory: true,
         presets: [
-          require.resolve('babel-preset-stage-0'),
           require.resolve('babel-preset-latest'),
+          require.resolve('babel-preset-stage-0'),
           require.resolve('babel-preset-react')
         ],
         plugins: [
