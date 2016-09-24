@@ -1,5 +1,5 @@
 /*eslint-disable*/
-var combineLoader = require('combineLoader');
+var combineLoader = require('webpack-combine-loaders');
 
 /*WEBPACK COMMON LOADERS*/
 module.exports = {
