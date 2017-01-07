@@ -35,27 +35,30 @@ module.exports = {
    * @param vendor module name or absolute path
    */
   addVendor: function (vendor) {
-    if (this.entry['vendor']) {
+    if (this.__vendorAlias) {
       if (vendor) {
+        var vendorChunk = this.entry[this.__vendorAlias];
         var valueType = vendor.constructor.name.toLowerCase();
 
         if (valueType == 'string') {
-          this.entry.vendor.push(vendor);
+          vendorChunk.push(vendor);
         }
         if (valueType == 'array') {
-          this.entry.vendor = this.entry.vendor.concat(vendor);
+          vendorChunk = vendorChunk.concat(vendor);
         }
       }
     } else {
       console.warn('Please enable vendors configuration.');
     }
   },
+
   output: {
     filename: '[name].js',
     publicPath: '/',
     libraryTarget: 'umd',
     library: ''
   },
+
   /**
    * @method setUMDName
    * @param  {[type]}   libraryName [description]
@@ -97,7 +100,7 @@ module.exports = {
     this.module.noParse.push(matchRegex);
   },
   resolve: {
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['', '.js', '.jsx', '.css', '.scss', '.less'],
     root: [],
     alias: {}
   },
@@ -112,10 +115,21 @@ module.exports = {
    * addModuleAlias
    * @param {string} source name
    * @param {string} alias name
+   * @param {string} noparse
+   * @param {string} isvendor
    */
-  addModuleAlias: function (source, alias) {
-    this.resolve.alias[source] = alias;
+  addModuleAlias: function (alias, source, noParse, isVendor) {
+    this.resolve.alias[alias] = source;
+
+    if (noParse) {
+      this.addModuleNoParse(source);
+    }
+
+    if (isVendor) {
+      this.addVendor(source);
+    }
   },
+
   externals: [],
   /**
    * @method addExternal
@@ -155,6 +169,13 @@ module.exports = {
   setDevServer: function setDevServer(host, port) {
     this.devServer.host = host || 'localhost';
     this.devServer.port = port || 8080;
+  },
+
+  postcss: function () {
+    return [
+      require('precss'),
+      require('autoprefixer'),
+    ]
   }
 };
 

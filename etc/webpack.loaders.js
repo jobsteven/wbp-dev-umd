@@ -1,5 +1,7 @@
 /*eslint-disable*/
 /*WEBPACK COMMON LOADERS*/
+var ExtractTextPlugin = require("extract-text-webpack-plugin");
+
 module.exports = {
   getJSLoader: function (cx) {
     return {
@@ -14,7 +16,12 @@ module.exports = {
           require.resolve('babel-preset-react')
         ],
         plugins: [
-          require.resolve('react-hot-loader/babel')
+          require.resolve('react-hot-loader/babel'), [
+            require.resolve('babel-plugin-import'), [{
+              "libraryName": "antd",
+              "style": true
+            }]
+          ]
         ]
       }
     }
@@ -26,37 +33,48 @@ module.exports = {
       include: cx.__sourcedir
     }
   },
-  getCSSLoader: function (cx) {
-    return {
-      test: /\.css$/,
-      loaders: ['style', 'css'],
-    }
-  },
-  getLessLoader: function (cx) {
-    return {
-      test: /\.less$/,
-      loaders: ['style', 'css', 'less'],
-    }
-  },
-  getPostCSSLoader: function (cx) {
-    return {
-      test: /\.css$/,
-      loaders: ['style', 'css', 'postcss'],
-    }
-  },
-  getCSSNextLoader: function (cx) {
-    return {
-      test: /\.css$/,
-      loaders: ['style', 'css', 'cssnext'],
-    }
-  },
   getFontLoader: function (cx) {
     return {
       test: /\.ttf$|\.eot$|\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
       loader: 'file',
+      include: cx.__sourcedir,
       query: {
         name: 'font/[name].[ext]'
       },
+    }
+  },
+  getSCSS_SRCLoader: function (cx, devMode) {
+    return {
+      test: /\.scss$/,
+      include: cx.__sourcedir,
+      loader: devMode ? 'style!css?localIdentName=[local]_[hash:base64:5]&camelCase&modules&importLoaders=1&minimize!postcss-loader?parser=postcss-scss' : ExtractTextPlugin.extract('style', ['css?camelCase&modules&importLoaders=1&minimize', 'postcss-loader?parser=postcss-scss']),
+    }
+  },
+  getLESS_SRCLoader: function (cx, devMode) {
+    return {
+      test: /\.less$/,
+      include: cx.__sourcedir,
+      loader: devMode ? 'style!css?localIdentName=[local]_[hash:base64:5]&camelCase&modules&importLoaders=1&minimize!postcss-loader?parser=postcss-less' : ExtractTextPlugin.extract('style', ['css?camelCase&modules&importLoaders=1&minimize', 'postcss-loader?parser=postcss-less']),
+    }
+  },
+  getSCSSLoader: function (cx) {
+    return {
+      test: /\.scss$/,
+      exclude: cx.__sourcedir,
+      loader: ExtractTextPlugin.extract('style', ['css?importLoaders=1&minimize', 'sass-loader']),
+    }
+  },
+  getLESSLoader: function (cx) {
+    return {
+      test: /\.less$/,
+      exclude: cx.__sourcedir,
+      loader: ExtractTextPlugin.extract('style', ['css?importLoaders=1&minimize', 'less-loader']),
+    }
+  },
+  getCSSLoader: function (cx, devMode) {
+    return {
+      test: /\.css$/,
+      loader: devMode ? 'style!css?minimize' : ExtractTextPlugin.extract('style', 'css?minimize')
     }
   }
 }

@@ -26,7 +26,7 @@ module.exports = function (cx, umdConf) {
           quoteCharacter: '"',
           removeComments: true
         },
-        hash: true
+        hash: false
       }, options);
       umdConf.addPlugin(new HTMLWebpackPlugin(mergeOptions));
     },
@@ -49,21 +49,32 @@ module.exports = function (cx, umdConf) {
         minChunks: Infinity,
       }, options)
       umdConf.entry[mergeOptions.name] = [];
+      umdConf.__vendorAlias = mergeOptions.name;
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin(mergeOptions));
     },
 
-    enableLibraries: function (options) {
+    enableCommons: function (options) {
       var mergeOptions = Object.assign({}, {
-        name: "libs",
-        children: true,
-        async: true
+        name: "commons"
       }, options)
+      umdConf.entry[mergeOptions.name] = [];
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin(mergeOptions));
     },
 
     enableOffline: function () {
       umdConf.addPlugin(new OfflinePlugin());
-    }
+      //install offapp
+      for (var key in umdConf.pkg.wbp.entries) {
+        var entryModules = umdConf.entry[key];
+        if (entryModules) {
+          entryModules.push(require.resolve('./offapp'));
+        }
+      }
+    },
+
+    enableChuckHash: function () {
+      umdConf.output.filename = '[name]_[' + (umdConf.devMode ? '' : 'chunk') + 'hash:7].js';
+    },
   };
 }
 

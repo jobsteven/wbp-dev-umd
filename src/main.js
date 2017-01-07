@@ -1,13 +1,12 @@
-/*eslint-disable*/
 var webpack = require('webpack');
 var express = require('express');
 var expressServer = express();
 var getWebpackDevMiddleware = require('webpack-dev-middleware');
 var getWebpackHotMiddleware = require('webpack-hot-middleware');
-var HTMLWebpackPlugin = require('html-webpack-plugin');
 var fs = require('promisify-fs');
 var webpackLoaders = require('../etc/webpack.loaders.js');
 var webpackFeatures = require('../etc/webpack.features.js');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var path = require('path');
 var Promise = require('bluebird');
 
@@ -98,6 +97,8 @@ function getWebpackCompiler(devMode) {
         umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin(true));
       }
 
+      umdConf.addPlugin(new ExtractTextPlugin('[name]_[contenthash:7].css'));
+
       //Add Loaders Search Paths
       umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
       umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
@@ -105,7 +106,11 @@ function getWebpackCompiler(devMode) {
 
       // Add Module Loaders
       umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx));
-      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx));
+      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getSCSS_SRCLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getSCSSLoader(cx));
+      umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getLESSLoader(cx));
       umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx));
       umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx));
 
