@@ -14,21 +14,24 @@ module.exports = function (cx, umdConf) {
     },
 
     enableEntryHTML: function (options) {
-      var mergeOptions = Object.assign({}, {
-        filename: 'index.html',
-        template: cx.getCwdPath('./etc/umd.template.html'),
-        minify: {
-          preserveLineBreaks: false,
-          collapseWhitespace: true,
-          collapseInlineTagWhitespace: true,
-          minifyCSS: true,
-          minifyJS: true,
-          quoteCharacter: '"',
-          removeComments: true
-        },
-        hash: false
-      }, options);
-      umdConf.addPlugin(new HTMLWebpackPlugin(mergeOptions));
+      for (var key in umdConf.pkg.wbp.entries) {
+        var mergeOptions = Object.assign({}, {
+          filename: key + '.html',
+          template: cx.getCwdPath('./etc/umd.template.html'),
+          minify: {
+            preserveLineBreaks: false,
+            collapseWhitespace: true,
+            collapseInlineTagWhitespace: true,
+            minifyCSS: true,
+            minifyJS: true,
+            quoteCharacter: '"',
+            removeComments: true,
+          },
+          chunks: [key],
+          hash: false
+        }, options);
+        umdConf.addPlugin(new HTMLWebpackPlugin(mergeOptions));
+      }
     },
 
     enableEntryHot: function (entryName) {
