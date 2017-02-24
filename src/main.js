@@ -118,7 +118,8 @@ function getWebpackCompiler(devMode) {
       umdConf.addModuleSearchPath(cx.__sourcedir);
 
       //ResolveEntryModules
-      umdConf.setContext(cx.__sourcedir);
+      // umdConf.setContext(cx.__sourcedir);
+      umdConf.setContext(cx.getCwdPath('./'));
       umdConf.setExportedName(umdConf.pkg.name);
       umdConf.setBuildPath(cx.__builddir);
 
@@ -182,6 +183,9 @@ function mountWebpackMiddles() {
       res.end();
     })
     expressServer.use(express.static(cx.__builddir));
+    expressServer.get('/', function (req, res) {
+      res.redirect('./test.html');
+    })
   });
 }
 
