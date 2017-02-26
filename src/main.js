@@ -84,6 +84,7 @@ function getWebpackCompiler(devMode) {
 
       //project paths
       cx.__sourcedir = cx.getCwdPath(umdConf.pkg.wbp.source || './src');
+      cx.__testdir = cx.getCwdPath(umdConf.pkg.wbp.test || './test');
       cx.__builddir = cx.getCwdPath(umdConf.pkg.wbp.build || './dist');
       cx.__cwdDependencesDir = cx.__cwd + '/node_modules';
       cx.__homeDependenceDir = cx.__home + '/node_modules';

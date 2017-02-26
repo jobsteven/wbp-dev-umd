@@ -6,7 +6,7 @@ module.exports = {
   getJSLoader: function (cx) {
     return {
       test: /\.jsx?$/,
-      include: cx.__sourcedir,
+      include: [cx.__sourcedir, cx.__testdir],
       loader: 'babel-loader',
       query: {
         cacheDirectory: true,
