@@ -3,11 +3,12 @@ var express = require('express');
 var expressServer = express();
 var getWebpackDevMiddleware = require('webpack-dev-middleware');
 var getWebpackHotMiddleware = require('webpack-hot-middleware');
-var fs = require('promisify-fs');
 var webpackLoaders = require('../etc/webpack.loaders.js');
 var webpackFeatures = require('../etc/webpack.features.js');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var path = require('path');
+var pfs = require('promisify-fs');
+var fs = require('fs');
 var Promise = require('bluebird');
 
 /**
@@ -61,7 +62,19 @@ function startWebpackCompiler() {
  * @return {[type]}
  */
 function startDevServer() {
-  //start dev server
+  if (fs.existsSync(cx.__ssldir)) {
+    // start ssl dev server
+    var sslOptions = {
+      key: fs.readFileSync(cx.__ssldir + '/key'),
+      cert: fs.readFileSync(cx.__ssldir + '/cert')
+    };
+    require('https').createServer(sslOptions, expressServer).listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function () {
+      cx.info('DevServer: ' + cx.umdConf.devServer.host + ':' + cx.umdConf.devServer.port + ' *ssl enabled*');
+    });
+    return
+  }
+
+  // start dev server
   return expressServer.listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function () {
     cx.info('DevServer: ' + cx.umdConf.devServer.host + ':' + cx.umdConf.devServer.port + ' ');
   });
@@ -73,7 +86,7 @@ function startDevServer() {
  * @return {[type]}
  */
 function getWebpackCompiler(devMode) {
-  return fs
+  return pfs
     .readJSON(cx.getCwdPath('./package.json'))
     .then(function (pkg) {
       var umdConf = require(cx.__plugin_dir + '/etc/webpack.config.umd.js');
@@ -82,10 +95,14 @@ function getWebpackCompiler(devMode) {
       umdConf.webpackLoaders = webpackLoaders;
       umdConf.webpackFeatures = webpackFeatures(cx, umdConf);
 
+      // Expose umdConfig
+      cx.umdConf = umdConf;
+
       //project paths
       cx.__sourcedir = cx.getCwdPath(umdConf.pkg.wbp.source || './src');
       cx.__testdir = cx.getCwdPath(umdConf.pkg.wbp.test || './test');
       cx.__builddir = cx.getCwdPath(umdConf.pkg.wbp.build || './dist');
+      cx.__ssldir = cx.getCwdPath(umdConf.pkg.wbp.ssl || './ssl');
       cx.__cwdDependencesDir = cx.__cwd + '/node_modules';
       cx.__homeDependenceDir = cx.__home + '/node_modules';
       cx.__pluginDependencesDir = cx.__plugin_dir + '/node_modules';
@@ -106,7 +123,7 @@ function getWebpackCompiler(devMode) {
       umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
 
       // Add Module Loaders
-      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx));
+      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, devMode));
       umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, devMode));
       umdConf.addModuleLoader(webpackLoaders.getSCSS_SRCLoader(cx, devMode));
       umdConf.addModuleLoader(webpackLoaders.getSCSSLoader(cx));
@@ -134,9 +151,6 @@ function getWebpackCompiler(devMode) {
 
       // Create Webpack Compiler
       cx.webpackCompiler = webpack(umdConf);
-
-      // Expose umdConfig
-      cx.umdConf = umdConf;
     })
 }
 

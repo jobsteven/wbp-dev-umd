@@ -3,7 +3,7 @@
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
-  getJSLoader: function (cx) {
+  getJSLoader: function (cx, devMode) {
     return {
       test: /\.jsx?$/,
       include: [cx.__sourcedir, cx.__testdir],
@@ -17,10 +17,19 @@ module.exports = {
         ],
         plugins: [
           require.resolve('react-hot-loader/babel'), [
-            require.resolve('babel-plugin-import'), [{
+            require.resolve('babel-plugin-import'), {
               "libraryName": "antd",
               "style": true
-            }]
+            }
+          ],
+          [
+            require.resolve('babel-plugin-css-in-js'), {
+              "identifier": 'CSS_IN_JS',
+              "vendorPrefixes": true,
+              "minify": !devMode,
+              "compressClassNames": !devMode,
+              "bundleFile": (cx.umdConf.pkg.wbp.build || './dist') + '/cssinjs.css'
+            }
           ]
         ]
       }
