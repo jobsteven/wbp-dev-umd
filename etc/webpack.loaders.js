@@ -16,21 +16,13 @@ module.exports = {
           require.resolve('babel-preset-react')
         ],
         plugins: [
-          require.resolve('react-hot-loader/babel'), [
+          [
             require.resolve('babel-plugin-import'), {
               "libraryName": "antd",
               "style": true
             }
           ],
-          [
-            require.resolve('babel-plugin-css-in-js'), {
-              "identifier": 'CSS_IN_JS',
-              "vendorPrefixes": true,
-              "minify": !devMode,
-              "compressClassNames": !devMode,
-              "bundleFile": (cx.umdConf.pkg.wbp.build || './dist') + '/cssinjs.css'
-            }
-          ]
+          require.resolve('react-hot-loader/babel')
         ]
       }
     }
