@@ -76,6 +76,11 @@ module.exports = function (cx, umdConf) {
     enableChuckHash: function () {
       umdConf.output.filename = '[name]_[' + (umdConf.devMode ? '' : 'chunk') + 'hash:7].js';
     },
+
+    enableNode: function () {
+      umdConf.target = 'node';
+      umdConf.addExternal(/node_modules/);
+    }
   };
 }
 

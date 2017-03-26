@@ -59,6 +59,18 @@ module.exports = {
     library: ''
   },
 
+  /*
+  "web" Compile for usage in a browser-like environment (default)
+  "webworker" Compile as WebWorker
+  "node" Compile for usage in a node.js-like environment (use require to load chunks)
+  "async-node" Compile for usage in a node.js-like environment (use fs and vm to load chunks async)
+  "node-webkit" Compile for usage in webkit, uses jsonp chunk loading but also supports build in node.js modules plus require(“nw.gui”) (experimental)
+  "electron" Compile for usage in Electron – supports require-ing Electron-specific modules.
+  "electron-renderer" Compile for electron renderer process, provide a target using JsonpTemplatePlugin, FunctionModulePlugin for browser environment and NodeTargetPlugin and ExternalsPlugin for commonjs and electron bulit-in modules. Note: need webpack >= 1.12.15.
+   */
+
+  target: 'web',
+
   /**
    * @method setUMDName
    * @param  {[type]}   libraryName [description]
