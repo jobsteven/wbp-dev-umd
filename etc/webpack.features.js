@@ -40,7 +40,7 @@ module.exports = function (cx, umdConf) {
     },
 
     enableUglifyJs: function (options) {
-      var mergeOptions = Object.assign({}, { sourceMap: false, comments: false }, options)
+      var mergeOptions = Object.assign({ comments: false }, options)
       umdConf.addPlugin(new webpack.optimize.UglifyJsPlugin(mergeOptions))
     },
 
@@ -60,6 +60,10 @@ module.exports = function (cx, umdConf) {
       }, options)
       umdConf.entry[mergeOptions.name] = [];
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin(mergeOptions));
+    },
+
+    enableIgnore: function (requestRegExp, contextRegExp) {
+      umdConf.addPlugin(new webpack.IgnorePlugin(requestRegExp, contextRegExp));
     },
 
     enableOffline: function () {
@@ -83,4 +87,3 @@ module.exports = function (cx, umdConf) {
     }
   };
 }
-

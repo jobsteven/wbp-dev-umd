@@ -151,6 +151,16 @@ module.exports = {
   addExternal: function (external) {
     this.externals.push(external);
   },
+  addExternalRequire: function (moduleName) {
+    this.externals.push({
+      [moduleName]: 'commonjs ' + moduleName
+    })
+  },
+  addExternalGlobal: function (objName) {
+    this.externals.push({
+      [objName]: true
+    })
+  },
   resolveLoader: {
     root: []
   },
@@ -169,6 +179,7 @@ module.exports = {
   addPlugin: function (plugin) {
     this.plugins.push(plugin);
   },
+
   devServer: {
     host: 'localhost',
     port: 8080
@@ -190,4 +201,3 @@ module.exports = {
     ]
   }
 };
-
