@@ -114,7 +114,7 @@ module.exports = {
 
   resolve: {
     extensions: ['', '.js', '.jsx', '.css', '.scss', '.less'],
-    modules: [],
+    modules: ['node_modules'],
     alias: {}
   },
 
