@@ -4,16 +4,16 @@ var HTMLWebpackPlugin = require('html-webpack-plugin');
 var OfflinePlugin = require('offline-plugin');
 var webpack = require('webpack');
 
-module.exports = function (cx, umdConf) {
+module.exports = function(cx, umdConf) {
   return {
-    enableClean: function (absPaths) {
+    enableClean: function(absPaths) {
       var mergeAbsPaths = absPaths || [cx.__builddir];
       umdConf.addPlugin(new CleanWebpackPlugin(mergeAbsPaths, {
         root: cx.__cwd
       }))
     },
 
-    enableEntryHTML: function (entry, options) {
+    enableEntryHTML: function(entry, options) {
       var mergeOptions = Object.assign({}, {
         filename: (entry || 'main') + '.html',
         template: cx.getCwdPath('./etc/umd.template.html'),
@@ -32,19 +32,25 @@ module.exports = function (cx, umdConf) {
       umdConf.addPlugin(new HTMLWebpackPlugin(mergeOptions));
     },
 
-    enableEntryHot: function (entryName) {
+    enableEntryHot: function(entryName) {
       var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';
       var entryBundle = umdConf.entry[entryName || 'main'];
       if (entryBundle)
         entryBundle.unshift(webpackHotClient);
     },
 
-    enableUglifyJs: function (options) {
-      var mergeOptions = Object.assign({ comments: false }, options)
+    enableBabelPolyfill: function(entryName) {
+      var entryBundle = umdConf.entry[entryName || 'main'];
+      if (entryBundle)
+        entryBundle.unshift(require.resolve('babel-polyfill'));
+    },
+
+    enableUglifyJs: function(options) {
+      var mergeOptions = Object.assign({ comments: false, sourceMap: false, compress: true }, options)
       umdConf.addPlugin(new webpack.optimize.UglifyJsPlugin(mergeOptions))
     },
 
-    enableVendors: function (options) {
+    enableVendors: function(options) {
       var mergeOptions = Object.assign({}, {
         name: "vendor",
         minChunks: Infinity,
@@ -54,7 +60,7 @@ module.exports = function (cx, umdConf) {
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin(mergeOptions));
     },
 
-    enableCommons: function (options) {
+    enableCommons: function(options) {
       var mergeOptions = Object.assign({}, {
         name: "commons"
       }, options)
@@ -62,11 +68,7 @@ module.exports = function (cx, umdConf) {
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin(mergeOptions));
     },
 
-    enableIgnore: function (requestRegExp, contextRegExp) {
-      umdConf.addPlugin(new webpack.IgnorePlugin(requestRegExp, contextRegExp));
-    },
-
-    enableOffline: function () {
+    enableOffline: function() {
       umdConf.addPlugin(new OfflinePlugin());
       //install offapp
       for (var key in umdConf.pkg.wbp.entries) {
@@ -77,13 +79,17 @@ module.exports = function (cx, umdConf) {
       }
     },
 
-    enableChuckHash: function () {
+    enableChuckHash: function() {
       umdConf.output.filename = '[name]_[' + (umdConf.devMode ? '' : 'chunk') + 'hash:7].js';
     },
 
-    enableNode: function () {
+    enableNode: function() {
       umdConf.target = 'node';
       umdConf.addExternal(/node_modules/);
+    },
+
+    enableDevtool: function(devtoolType) {
+      umdConf.devtool = devtoolType || 'eval-source-map';
     }
   };
 }

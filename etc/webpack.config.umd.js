@@ -1,7 +1,11 @@
 /** WEBPACK-CONFIG-UMD */
+const externalNodeModules = require('webpack-node-externals');
+const webpack = require('webpack');
+
 /*eslint-disable*/
 module.exports = {
   context: process.cwd(),
+
   /**
    * setContext
    * @param {string} contextPath *MUST be a absolute path*
@@ -9,7 +13,9 @@ module.exports = {
   setContext: function setContext(contextPath) {
     this.context = contextPath;
   },
+
   entry: {},
+
   /**
    * addBundleEntry
    * @param {string} bundleName
@@ -19,63 +25,30 @@ module.exports = {
 
     var entryType = bundleEntry.constructor.name.toLowerCase();
     switch (entryType) {
-    case 'string':
-      bundleEntry = [bundleEntry];
-      break;
-    case 'array':
-      break;
-    default:
-      cx.warning('The type of bundleEntry is not supported yet.');
+      case 'string':
+        bundleEntry = [bundleEntry];
+        break;
+      case 'array':
+        break;
+      default:
+        cx.warning('The type of bundleEntry is not supported yet.');
     }
     this.entry[bundleName] = bundleEntry;
   },
 
-  /**
-   * @method addVendor
-   * @param vendor module name or absolute path
-   */
-  addVendor: function (vendor) {
-    if (this.__vendorAlias) {
-      if (vendor) {
-        var vendorChunk = this.entry[this.__vendorAlias];
-        var valueType = vendor.constructor.name.toLowerCase();
-
-        if (valueType == 'string') {
-          vendorChunk.push(vendor);
-        }
-        if (valueType == 'array') {
-          vendorChunk = vendorChunk.concat(vendor);
-        }
-      }
-    } else {
-      console.warn('Please enable vendors configuration.');
-    }
-  },
-
   output: {
+    path: `${process.cwd()}/dist`,
     filename: '[name].js',
     publicPath: '/',
     libraryTarget: 'umd',
     library: ''
   },
 
-  /*
-  "web" Compile for usage in a browser-like environment (default)
-  "webworker" Compile as WebWorker
-  "node" Compile for usage in a node.js-like environment (use require to load chunks)
-  "async-node" Compile for usage in a node.js-like environment (use fs and vm to load chunks async)
-  "node-webkit" Compile for usage in webkit, uses jsonp chunk loading but also supports build in node.js modules plus require(“nw.gui”) (experimental)
-  "electron" Compile for usage in Electron – supports require-ing Electron-specific modules.
-  "electron-renderer" Compile for electron renderer process, provide a target using JsonpTemplatePlugin, FunctionModulePlugin for browser environment and NodeTargetPlugin and ExternalsPlugin for commonjs and electron bulit-in modules. Note: need webpack >= 1.12.15.
-   */
-
-  target: 'web',
-
   /**
    * @method setUMDName
    * @param  {[type]}   libraryName [description]
    */
-  setExportedName: function (libraryName) {
+  setExportedName: function(libraryName) {
     this.output.library = libraryName;
   },
   /**
@@ -97,30 +70,32 @@ module.exports = {
     loaders: [],
     noParse: []
   },
+
   /**
    * addModuleLoader
    * @param {object} loader
    */
-  addModuleLoader: function (loader) {
+  addModuleLoader: function(loader) {
     this.module.loaders.push(loader);
   },
+
   /**
    * addModuleNoParse
    * @param {Regex} matchRegex , to match the resolved request.
    */
-  addModuleNoParse: function (matchRegex) {
+  addModuleNoParse: function(matchRegex) {
     this.module.noParse.push(matchRegex);
   },
-  resolve: {
-    extensions: ['', '.js', '.jsx', '.css', '.scss', '.less'],
-    root: [],
-    alias: {}
+
+  addParseInclude(abspath) {
+    this.module.loaders[0].include.push(abspath);
   },
+
   /**
    * addModuleSearchPath
    * @param {string} *MUST* be absolute path
    */
-  addModuleSearchPath: function (path) {
+  addModuleSearchPath: function(path) {
     this.resolve.root.push(path);
   },
   /**
@@ -130,7 +105,7 @@ module.exports = {
    * @param {string} noparse
    * @param {string} isvendor
    */
-  addModuleAlias: function (alias, source, noParse, isVendor) {
+  addModuleAlias: function(alias, source, noParse, isVendor) {
     this.resolve.alias[alias] = source;
 
     if (noParse) {
@@ -142,25 +117,43 @@ module.exports = {
     }
   },
 
-  externals: [],
+  resolve: {
+    extensions: ['', '.js', '.jsx', '.css', '.scss', '.less'],
+    root: [],
+    alias: {}
+  },
+
+  plugins: [],
   /**
-   * @method addExternal
-   * @param  external // string,object,function,RegExp,array
-   * http://webpack.github.io/docs/configuration.html#externals
+   * addPlugin
+   * @param {[object]} plugin
    */
-  addExternal: function (external) {
-    this.externals.push(external);
+  addPlugin: function(plugin) {
+    this.plugins.push(plugin);
   },
-  addExternalRequire: function (moduleName) {
-    this.externals.push({
-      [moduleName]: 'commonjs ' + moduleName
-    })
+
+  /**
+   * @method addVendor
+   * @param vendor module name or absolute path
+   */
+  addVendor: function(vendor) {
+    if (this.__vendorAlias) {
+      if (vendor) {
+        var vendorChunk = this.entry[this.__vendorAlias];
+        var valueType = vendor.constructor.name.toLowerCase();
+
+        if (valueType == 'string') {
+          vendorChunk.push(vendor);
+        }
+        if (valueType == 'array') {
+          vendorChunk = vendorChunk.concat(vendor);
+        }
+      }
+    } else {
+      console.warn('Please enable vendors configuration.');
+    }
   },
-  addExternalGlobal: function (objName) {
-    this.externals.push({
-      [objName]: true
-    })
-  },
+
   resolveLoader: {
     root: []
   },
@@ -168,16 +161,54 @@ module.exports = {
    * addLoaderSearchPath
    * @param {string} *MUST* be absolute path
    */
-  addLoaderSearchPath: function (path) {
+  addLoaderSearchPath: function(path) {
     this.resolveLoader.root.push(path);
   },
-  plugins: [],
-  /**
-   * addPlugin
-   * @param {[object]} plugin
+  /*
+  "web" Compile for usage in a browser-like environment (default)
+  "webworker" Compile as WebWorker
+  "node" Compile for usage in a node.js-like environment (use require to load chunks)
+  "async-node" Compile for usage in a node.js-like environment (use fs and vm to load chunks async)
+  "node-webkit" Compile for usage in webkit, uses jsonp chunk loading but also supports build in node.js modules plus require(“nw.gui”) (experimental)
+  "electron" Compile for usage in Electron – supports require-ing Electron-specific modules.
+  "electron-renderer" Compile for electron renderer process, provide a target using JsonpTemplatePlugin, FunctionModulePlugin for browser environment and NodeTargetPlugin and ExternalsPlugin for commonjs and electron bulit-in modules. Note: need webpack >= 1.12.15.
    */
-  addPlugin: function (plugin) {
-    this.plugins.push(plugin);
+
+  target: 'web',
+
+  externals: [],
+  /**
+   * @method addExternal
+   * @param  external // string,object,function,RegExp,array
+   * http://webpack.github.io/docs/configuration.html#externals
+   */
+  addExternal: function(external) {
+    this.externals.push(external);
+  },
+
+  addExternalRequire: function(moduleName) {
+    this.externals.push({
+      [moduleName]: 'commonjs ' + moduleName
+    })
+  },
+
+  addRequireIgnore: function(requestRegExp, contextRegExp) {
+    this.addPlugin(new webpack.IgnorePlugin(requestRegExp, contextRegExp));
+  },
+
+  addExternalNodeModules: function(options) {
+    this.externals.push(externalNodeModules(Object.assign({
+      whitelist: [],
+      importType: 'commonjs',
+      modulesDir: 'node_modules',
+      modulesFromFile: false
+    }, options)))
+  },
+
+  addExternalGlobal: function(objName) {
+    this.externals.push({
+      [objName]: true
+    })
   },
 
   devServer: {
@@ -194,7 +225,7 @@ module.exports = {
     this.devServer.port = port || 8080;
   },
 
-  postcss: function () {
+  postcss: function() {
     return [
       require('precss'),
       require('autoprefixer'),

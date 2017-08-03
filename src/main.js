@@ -30,8 +30,11 @@ module.exports = function main(params, options) {
   context = cx = this;
   // development/production
   var devMode = !(options['p'] || options['production']);
+  if (!devMode) {
+    process.env.NODE_ENV = 'production';
+  }
   return getWebpackCompiler(devMode)
-    .then(function () {
+    .then(function() {
       //devMode / proMode output
       if (options['d'] || options['developemnt'] || options['p'] || options['production']) {
         return startWebpackCompiler();
@@ -39,11 +42,11 @@ module.exports = function main(params, options) {
 
       // live developemnt
       return mountWebpackMiddles()
-        .then(function () {
+        .then(function() {
           return startDevServer();
         })
     })
-    .then(function (finalstate) {
+    .then(function(finalstate) {
       cx.info('webpack compilation is done, successfully.');
     })
 };
@@ -52,7 +55,7 @@ module.exports = function main(params, options) {
  * @return {[type]}
  */
 function startWebpackCompiler() {
-  return Promise.fromCallback(function (cb) {
+  return Promise.fromCallback(function(cb) {
     cx.webpackCompiler.run(cb)
   })
 }
@@ -68,14 +71,14 @@ function startDevServer() {
       key: fs.readFileSync(cx.__ssldir + '/key'),
       cert: fs.readFileSync(cx.__ssldir + '/cert')
     };
-    require('https').createServer(sslOptions, expressServer).listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function () {
+    require('https').createServer(sslOptions, expressServer).listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function() {
       cx.info('DevServer: ' + cx.umdConf.devServer.host + ':' + cx.umdConf.devServer.port + ' *ssl enabled*');
     });
     return
   }
 
   // start dev server
-  return expressServer.listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function () {
+  return expressServer.listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function() {
     cx.info('DevServer: ' + cx.umdConf.devServer.host + ':' + cx.umdConf.devServer.port + ' ');
   });
 }
@@ -88,7 +91,7 @@ function startDevServer() {
 function getWebpackCompiler(devMode) {
   return pfs
     .readJSON(cx.getCwdPath('./package.json'))
-    .then(function (pkg) {
+    .then(function(pkg) {
       var umdConf = require(cx.__plugin_dir + '/etc/webpack.config.umd.js');
       umdConf.pkg = pkg;
       umdConf.devMode = devMode;
@@ -179,7 +182,7 @@ function getLocalWebpackConfig(umdConf) {
  * @return {promise}
  */
 function mountWebpackMiddles() {
-  return Promise.try(function () {
+  return Promise.try(function() {
     var webpackHotMiddleware = getWebpackHotMiddleware(cx.webpackCompiler);
     var webpackDevMiddleware = getWebpackDevMiddleware(cx.webpackCompiler, {
       contentBase: cx.umdConf.output.path,
@@ -192,15 +195,21 @@ function mountWebpackMiddles() {
         colors: true
       }
     });
+
+    if (cx.umdConf.historyfallback) {
+      expressServer.use((req, res, next) => {
+        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|svg)|hmr)/) && req.url !== '/') {
+          req.originalUrl = req.path = req.url = '/';
+        }
+        next();
+      })
+    }
+
     expressServer.use(webpackDevMiddleware);
     expressServer.use(webpackHotMiddleware);
-    expressServer.get('favicon.ico', function (req, res) {
+    expressServer.get('favicon.ico', function(req, res) {
       res.end();
     })
     expressServer.use(express.static(cx.__builddir));
-    expressServer.get('/', function (req, res) {
-      res.redirect('./test.html');
-    })
   });
 }
-
