@@ -6,12 +6,6 @@ var webpack = require('webpack');
 
 module.exports = function(cx, umdConf) {
   return {
-    enableClean: function(absPaths) {
-      var mergeAbsPaths = absPaths || [cx.__builddir];
-      umdConf.addPlugin(new CleanWebpackPlugin(mergeAbsPaths, {
-        root: cx.__cwd
-      }))
-    },
 
     enableEntryHTML: function(entry, options) {
       var mergeOptions = Object.assign({}, {
@@ -30,6 +24,13 @@ module.exports = function(cx, umdConf) {
         hash: false
       }, options);
       umdConf.addPlugin(new HTMLWebpackPlugin(mergeOptions));
+    },
+
+    enableClean: function(absPaths) {
+      var mergeAbsPaths = absPaths || [cx.__builddir];
+      umdConf.addPlugin(new CleanWebpackPlugin(mergeAbsPaths, {
+        root: cx.__cwd
+      }))
     },
 
     enableEntryHot: function(entryName) {
@@ -89,7 +90,7 @@ module.exports = function(cx, umdConf) {
     },
 
     enableDevtool: function(devtoolType) {
-      umdConf.devtool = devtoolType || 'eval-source-map';
+      umdConf.devtool = devtoolType || 'inline-source-map';
     }
   };
 }

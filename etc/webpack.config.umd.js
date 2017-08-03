@@ -1,6 +1,7 @@
 /** WEBPACK-CONFIG-UMD */
 const externalNodeModules = require('webpack-node-externals');
 const webpack = require('webpack');
+const path = require('path');
 
 /*eslint-disable*/
 module.exports = {
@@ -37,7 +38,7 @@ module.exports = {
   },
 
   output: {
-    path: `${process.cwd()}/dist`,
+    path: path.resolve(process.cwd(), 'dist'),
     filename: '[name].js',
     publicPath: '/',
     libraryTarget: 'umd',
@@ -67,7 +68,8 @@ module.exports = {
   },
 
   module: {
-    loaders: [],
+    // loaders: [], old
+    rules: [],
     noParse: []
   },
 
@@ -76,7 +78,7 @@ module.exports = {
    * @param {object} loader
    */
   addModuleLoader: function(loader) {
-    this.module.loaders.push(loader);
+    this.module.rules.push(loader);
   },
 
   /**
@@ -88,16 +90,9 @@ module.exports = {
   },
 
   addParseInclude(abspath) {
-    this.module.loaders[0].include.push(abspath);
+    this.module.rules[0].include.push(abspath);
   },
 
-  /**
-   * addModuleSearchPath
-   * @param {string} *MUST* be absolute path
-   */
-  addModuleSearchPath: function(path) {
-    this.resolve.root.push(path);
-  },
   /**
    * addModuleAlias
    * @param {string} source name
@@ -119,11 +114,20 @@ module.exports = {
 
   resolve: {
     extensions: ['', '.js', '.jsx', '.css', '.scss', '.less'],
-    root: [],
+    modules: [],
     alias: {}
   },
 
+  /**
+   * addModuleSearchPath
+   * @param {string} *MUST* be absolute path
+   */
+  addModuleSearchPath: function(path) {
+    this.resolve.modules.push(path);
+  },
+
   plugins: [],
+
   /**
    * addPlugin
    * @param {[object]} plugin
@@ -155,14 +159,15 @@ module.exports = {
   },
 
   resolveLoader: {
-    root: []
+    modules: []
   },
+
   /**
    * addLoaderSearchPath
    * @param {string} *MUST* be absolute path
    */
   addLoaderSearchPath: function(path) {
-    this.resolveLoader.root.push(path);
+    this.resolveLoader.modules.push(path);
   },
   /*
   "web" Compile for usage in a browser-like environment (default)

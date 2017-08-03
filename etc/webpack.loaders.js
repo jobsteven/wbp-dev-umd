@@ -3,6 +3,7 @@
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
+
   getJSLoader: function(cx, devMode) {
     return {
       test: /\.jsx?$/,
@@ -15,17 +16,25 @@ module.exports = {
           require.resolve('babel-preset-react'),
           require.resolve('babel-preset-stage-0')
         ],
-        plugins: [
-          "transform-runtime",
-          "transform-decorators-legacy", [require.resolve('babel-plugin-import'), {
-            "libraryName": "antd",
-            "style": true
-          }],
-          require.resolve('react-hot-loader/babel')
-        ]
+        // plugins: [
+        //   "transform-runtime",
+        //   "transform-decorators-legacy", [require.resolve('babel-plugin-import'), {
+        //     "libraryName": "antd",
+        //     "style": true
+        //   }],
+        //   require.resolve('react-hot-loader/babel')
+        // ]
       }
     }
   },
+
+  getCSSLoader: function(cx, devMode) {
+    return {
+      test: /\.css$/,
+      loader: devMode ? 'style-loader!css-loader?minimize' : ExtractTextPlugin.extract('style-loader', 'css-loader?minimize')
+    }
+  },
+
   getImgLoader: function(cx) {
     return {
       test: /\.(jpe?g|png|svg|gif)$/i,
@@ -33,9 +42,10 @@ module.exports = {
       include: cx.__sourcedir
     }
   },
+
   getFontLoader: function(cx) {
     return {
-      test: /\.ttf$|\.eot$|\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+      test: /.otf$|\.ttf$|\.eot$|\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
       loader: 'file',
       include: cx.__sourcedir,
       query: {
@@ -43,38 +53,37 @@ module.exports = {
       },
     }
   },
+
   getSCSS_SRCLoader: function(cx, devMode) {
     return {
       test: /\.scss$/,
       include: cx.__sourcedir,
-      loader: devMode ? 'style!css?localIdentName=[local]_[hash:base64:5]&camelCase&modules&importLoaders=1&minimize!postcss-loader?parser=postcss-scss' : ExtractTextPlugin.extract('style', ['css?camelCase&modules&importLoaders=1&minimize', 'postcss-loader?parser=postcss-scss']),
+      loader: devMode ? 'style-loader!css-loader?localIdentName=[local]_[hash:base64:5]&camelCase&modules&importLoaders=1&minimize!postcss-loader?parser=postcss-scss' : ExtractTextPlugin.extract('style-loader', ['css-loader?camelCase&modules&importLoaders=1&minimize', 'postcss-loader?parser=postcss-scss']),
     }
   },
+
   getLESS_SRCLoader: function(cx, devMode) {
     return {
       test: /\.less$/,
       include: cx.__sourcedir,
-      loader: devMode ? 'style!css?localIdentName=[local]_[hash:base64:5]&camelCase&modules&importLoaders=1&minimize!postcss-loader?parser=postcss-less' : ExtractTextPlugin.extract('style', ['css?camelCase&modules&importLoaders=1&minimize', 'postcss-loader?parser=postcss-less']),
+      loader: devMode ? 'style-loader!css-loader?localIdentName=[local]_[hash:base64:5]&camelCase&modules&importLoaders=1&minimize!postcss-loader?parser=postcss-less' : ExtractTextPlugin.extract('style-loader', ['css-loader?camelCase&modules&importLoaders=1&minimize', 'postcss-loader?parser=postcss-less']),
     }
   },
+
   getSCSSLoader: function(cx) {
     return {
       test: /\.scss$/,
       exclude: cx.__sourcedir,
-      loader: ExtractTextPlugin.extract('style', ['css?importLoaders=1&minimize', 'sass-loader']),
+      loader: ExtractTextPlugin.extract('style-loader', ['css-loader?importLoaders=1&minimize', 'sass-loader']),
     }
   },
+
   getLESSLoader: function(cx) {
     return {
       test: /\.less$/,
       exclude: cx.__sourcedir,
-      loader: ExtractTextPlugin.extract('style', ['css?importLoaders=1&minimize', 'less-loader']),
-    }
-  },
-  getCSSLoader: function(cx, devMode) {
-    return {
-      test: /\.css$/,
-      loader: devMode ? 'style!css?minimize' : ExtractTextPlugin.extract('style', 'css?minimize')
+      loader: ExtractTextPlugin.extract('style-loader', ['css-loader?importLoaders=1&minimize', 'less-loader']),
     }
   }
+
 }

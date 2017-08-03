@@ -115,15 +115,19 @@ function getWebpackCompiler(devMode) {
         umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
       } else {
         umdConf.addPlugin(new webpack.optimize.DedupePlugin());
+        umdConf.addPlugin(new webpack.HashedModuleIdsPlugin());
         umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin(true));
       }
 
       umdConf.addPlugin(new ExtractTextPlugin('[name]_[contenthash:7].css'));
 
+      // default features
+      umdConf.webpackFeatures.enableChuckHash();
+
       //Add Loaders Search Paths
-      umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
       umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
-      umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
+      // umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
+      // umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
 
       // Add Module Loaders
       umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, devMode));
@@ -137,6 +141,8 @@ function getWebpackCompiler(devMode) {
 
       //Add Module Search Paths
       umdConf.addModuleSearchPath(cx.__sourcedir);
+      umdConf.addModuleSearchPath(cx.__cwdDependencesDir);
+      umdConf.addModuleSearchPath(cx.__pluginDependencesDir);
 
       //ResolveEntryModules
       // umdConf.setContext(cx.__sourcedir);
