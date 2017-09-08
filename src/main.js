@@ -137,7 +137,6 @@ function getWebpackCompiler(devMode) {
       //Add Loaders Search Paths
       umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
       umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
-      // umdConf.addLoaderSearchPath(cx.__cwdDependencesDir);
 
       // Add Module Loaders
       umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, devMode));
@@ -155,7 +154,7 @@ function getWebpackCompiler(devMode) {
       umdConf.addModuleSearchPath(cx.__sourcedir);
       umdConf.addModuleSearchPath('node_modules');
       umdConf.addModuleSearchPath(cx.__pluginDependencesDir);
-      // umdConf.addModuleSearchPath(cx.__cwdDependencesDir);
+      umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
 
       //ResolveEntryModules
       // umdConf.setContext(cx.__sourcedir);
