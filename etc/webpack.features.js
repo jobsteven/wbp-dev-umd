@@ -1,6 +1,7 @@
 /*eslint-disable*/
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 var HTMLWebpackPlugin = require('html-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var OfflinePlugin = require('offline-plugin');
 var webpack = require('webpack');
 
@@ -9,7 +10,7 @@ module.exports = function(cx, umdConf) {
 
     enableEntryHTML: function(entry, options) {
       var mergeOptions = Object.assign({}, {
-        filename: (entry || 'main') + '.html',
+        filename: (entry || 'index') + '.html',
         template: cx.getCwdPath('./etc/umd.template.html'),
         minify: {
           preserveLineBreaks: false,
@@ -20,9 +21,10 @@ module.exports = function(cx, umdConf) {
           quoteCharacter: '"',
           removeComments: true,
         },
-        chunks: [(entry || 'main')],
+        chunks: [(entry || 'index')],
         hash: false
       }, options);
+      if (umdConf.__vendorAlias) mergeOptions.chunks.unshift(umdConf.__vendorAlias);
       umdConf.addPlugin(new HTMLWebpackPlugin(mergeOptions));
     },
 
@@ -33,22 +35,38 @@ module.exports = function(cx, umdConf) {
       }))
     },
 
+    enableHistoryfallback: true,
+
+    enableASAR: false,
+
     enableEntryHot: function(entryName) {
       var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';
-      var entryBundle = umdConf.entry[entryName || 'main'];
-      if (entryBundle)
+      var entryBundle = umdConf.webpackOptions.entry[entryName || 'main'];
+      if (entryBundle) {
         entryBundle.unshift(webpackHotClient);
+      }
     },
 
     enableBabelPolyfill: function(entryName) {
-      var entryBundle = umdConf.entry[entryName || 'main'];
+      var entryBundle = umdConf.webpackOptions.entry[entryName || 'main'];
       if (entryBundle)
         entryBundle.unshift(require.resolve('babel-polyfill'));
     },
 
     enableUglifyJs: function(options) {
-      var mergeOptions = Object.assign({ comments: false, sourceMap: false, compress: true }, options)
-      umdConf.addPlugin(new webpack.optimize.UglifyJsPlugin(mergeOptions))
+      var mergeOptions = Object.assign({
+        parallel: true,
+        sourceMap: false,
+        uglifyOptions: {
+          output: {
+            comments: false,
+            beautify: false
+          },
+          warnings: false
+        }
+      }, options);
+
+      umdConf.addPlugin(new UglifyJSPlugin(mergeOptions));
     },
 
     enableVendors: function(options) {
@@ -56,7 +74,7 @@ module.exports = function(cx, umdConf) {
         name: "vendor",
         minChunks: Infinity,
       }, options)
-      umdConf.entry[mergeOptions.name] = [];
+      umdConf.webpackOptions.entry[mergeOptions.name] = [];
       umdConf.__vendorAlias = mergeOptions.name;
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin(mergeOptions));
     },
@@ -65,32 +83,48 @@ module.exports = function(cx, umdConf) {
       var mergeOptions = Object.assign({}, {
         name: "commons"
       }, options)
-      umdConf.entry[mergeOptions.name] = [];
+      umdConf.webpackOptions.entry[mergeOptions.name] = [];
       umdConf.addPlugin(new webpack.optimize.CommonsChunkPlugin(mergeOptions));
     },
 
-    enableOffline: function() {
+    enableOffline: false,
+
+    installOffline: function() {
       umdConf.addPlugin(new OfflinePlugin());
       //install offapp
       for (var key in umdConf.pkg.wbp.entries) {
-        var entryModules = umdConf.entry[key];
+        var entryModules = umdConf.webpackOptions.entry[key];
         if (entryModules) {
-          entryModules.push(require.resolve('./offapp'));
+          entryModules.push(require.resolve('../lib/offapp.js'));
         }
       }
     },
 
     enableChuckHash: function() {
-      umdConf.output.filename = '[name]_[' + (umdConf.devMode ? '' : 'chunk') + 'hash:7].js';
+      umdConf.webpackOptions.output.filename = '[name]' + (umdConf.devMode ? '' : '_[chunkhash:7]') + '.js';
+      // if (umdConf.devMode) {
+      //   umdConf.webpackOptions.output.filename = '[name].js';
+      // } else {
+      //   umdConf.webpackOptions.output.filename = '[id].js';
+      // }
     },
 
-    enableNode: function() {
-      umdConf.target = 'node';
-      umdConf.addExternal(/node_modules/);
+    enableNode: function(options, target) {
+      umdConf.webpackOptions.target = target || 'node';
+      umdConf.addExternalNodeModules(options);
     },
 
-    enableDevtool: function(devtoolType) {
-      umdConf.devtool = devtoolType || 'inline-source-map';
+    enableDevtool: function(devtoolType = 'eval') {
+      umdConf.webpackOptions.devtool = devtoolType;
+    },
+
+    enableHits: function(hitsobj) {
+      umdConf.webpackOptions.performance = Object.assign({
+        hints: 'warning',
+        assetFilter: function(assetFilename) {
+          return assetFilename.endsWith('.js');
+        }
+      }, hitsobj);
     }
   };
 }

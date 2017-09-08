@@ -3,19 +3,56 @@ const externalNodeModules = require('webpack-node-externals');
 const webpack = require('webpack');
 const path = require('path');
 
-/*eslint-disable*/
-module.exports = {
+const webpackOptions = {
   context: process.cwd(),
+
+  entry: {},
+
+  output: {
+    path: path.resolve(process.cwd(), 'dist'),
+    filename: '[name].js',
+    publicPath: '',
+    libraryTarget: 'umd',
+    library: ''
+  },
+
+  module: {
+    rules: [],
+    // noParse: []
+  },
+
+  resolve: {
+    extensions: ['.js', '.jsx', '.css', '.scss', '.less'],
+    modules: [],
+    alias: {}
+  },
+
+  plugins: [],
+
+  resolveLoader: {
+    modules: []
+  },
+
+  target: 'web',
+
+  externals: [],
+
+  devServer: {
+    host: '0.0.0.0',
+    port: 8080
+  }
+};
+
+module.exports = {
+  webpackOptions,
 
   /**
    * setContext
    * @param {string} contextPath *MUST be a absolute path*
    */
   setContext: function setContext(contextPath) {
-    this.context = contextPath;
+    this.webpackOptions.context = contextPath;
   },
-
-  entry: {},
 
   /**
    * addBundleEntry
@@ -23,7 +60,6 @@ module.exports = {
    * @param {string/array} bundleEntry
    */
   addBundleEntry: function addBundleEntry(bundleName, bundleEntry) {
-
     var entryType = bundleEntry.constructor.name.toLowerCase();
     switch (entryType) {
       case 'string':
@@ -34,15 +70,7 @@ module.exports = {
       default:
         cx.warning('The type of bundleEntry is not supported yet.');
     }
-    this.entry[bundleName] = bundleEntry;
-  },
-
-  output: {
-    path: path.resolve(process.cwd(), 'dist'),
-    filename: '[name].js',
-    publicPath: '/',
-    libraryTarget: 'umd',
-    library: ''
+    this.webpackOptions.entry[bundleName] = bundleEntry;
   },
 
   /**
@@ -50,27 +78,21 @@ module.exports = {
    * @param  {[type]}   libraryName [description]
    */
   setExportedName: function(libraryName) {
-    this.output.library = libraryName;
+    this.webpackOptions.output.library = libraryName;
   },
   /**
    * setBuildPath
    * @param {string} buildPath
    */
   setBuildPath: function setBuildPath(buildPath) {
-    this.output.path = buildPath;
+    this.webpackOptions.output.path = buildPath;
   },
   /**
    * @method setPublicPath
    * @param  {string}      publicPath
    */
   setPublicPath: function setPublicPath(publicPath) {
-    this.output.publicPath = publicPath;
-  },
-
-  module: {
-    // loaders: [], old
-    rules: [],
-    noParse: []
+    this.webpackOptions.output.publicPath = publicPath || '';
   },
 
   /**
@@ -78,7 +100,7 @@ module.exports = {
    * @param {object} loader
    */
   addModuleLoader: function(loader) {
-    this.module.rules.push(loader);
+    this.webpackOptions.module.rules.push(loader);
   },
 
   /**
@@ -86,11 +108,12 @@ module.exports = {
    * @param {Regex} matchRegex , to match the resolved request.
    */
   addModuleNoParse: function(matchRegex) {
-    this.module.noParse.push(matchRegex);
+    if (!this.webpackOptions.module.noParse) this.webpackOptions.module.noParse = [];
+    this.webpackOptions.module.noParse.push(matchRegex);
   },
 
   addParseInclude(abspath) {
-    this.module.rules[0].include.push(abspath);
+    this.webpackOptions.module.rules[0].include.push(abspath);
   },
 
   /**
@@ -101,21 +124,15 @@ module.exports = {
    * @param {string} isvendor
    */
   addModuleAlias: function(alias, source, noParse, isVendor) {
-    this.resolve.alias[alias] = source;
+    this.webpackOptions.resolve.alias[alias] = source;
 
     if (noParse) {
-      this.addModuleNoParse(source);
+      this.webpackOptions.addModuleNoParse(source);
     }
 
     if (isVendor) {
-      this.addVendor(source);
+      this.webpackOptions.addVendor(source);
     }
-  },
-
-  resolve: {
-    extensions: ['', '.js', '.jsx', '.css', '.scss', '.less'],
-    modules: ['node_modules'],
-    alias: {}
   },
 
   /**
@@ -123,17 +140,15 @@ module.exports = {
    * @param {string} *MUST* be absolute path
    */
   addModuleSearchPath: function(path) {
-    this.resolve.modules.push(path);
+    this.webpackOptions.resolve.modules.push(path);
   },
-
-  plugins: [],
 
   /**
    * addPlugin
    * @param {[object]} plugin
    */
   addPlugin: function(plugin) {
-    this.plugins.push(plugin);
+    this.webpackOptions.plugins.push(plugin);
   },
 
   /**
@@ -143,7 +158,7 @@ module.exports = {
   addVendor: function(vendor) {
     if (this.__vendorAlias) {
       if (vendor) {
-        var vendorChunk = this.entry[this.__vendorAlias];
+        var vendorChunk = this.webpackOptions.entry[this.__vendorAlias];
         var valueType = vendor.constructor.name.toLowerCase();
 
         if (valueType == 'string') {
@@ -158,16 +173,12 @@ module.exports = {
     }
   },
 
-  resolveLoader: {
-    modules: []
-  },
-
   /**
    * addLoaderSearchPath
    * @param {string} *MUST* be absolute path
    */
   addLoaderSearchPath: function(path) {
-    this.resolveLoader.modules.push(path);
+    this.webpackOptions.resolveLoader.modules.push(path);
   },
   /*
   "web" Compile for usage in a browser-like environment (default)
@@ -179,30 +190,27 @@ module.exports = {
   "electron-renderer" Compile for electron renderer process, provide a target using JsonpTemplatePlugin, FunctionModulePlugin for browser environment and NodeTargetPlugin and ExternalsPlugin for commonjs and electron bulit-in modules. Note: need webpack >= 1.12.15.
    */
 
-  target: 'web',
-
-  externals: [],
   /**
    * @method addExternal
    * @param  external // string,object,function,RegExp,array
    * http://webpack.github.io/docs/configuration.html#externals
    */
   addExternal: function(external) {
-    this.externals.push(external);
+    this.webpackOptions.externals.push(external);
   },
 
   addExternalRequire: function(moduleName) {
-    this.externals.push({
+    this.webpackOptions.externals.push({
       [moduleName]: 'commonjs ' + moduleName
     })
   },
 
   addRequireIgnore: function(requestRegExp, contextRegExp) {
-    this.addPlugin(new webpack.IgnorePlugin(requestRegExp, contextRegExp));
+    this.webpackOptions.addPlugin(new webpack.IgnorePlugin(requestRegExp, contextRegExp));
   },
 
   addExternalNodeModules: function(options) {
-    this.externals.push(externalNodeModules(Object.assign({
+    this.webpackOptions.externals.push(externalNodeModules(Object.assign({
       whitelist: [],
       importType: 'commonjs',
       modulesDir: 'node_modules',
@@ -211,23 +219,19 @@ module.exports = {
   },
 
   addExternalGlobal: function(objName) {
-    this.externals.push({
+    this.webpackOptions.externals.push({
       [objName]: true
     })
   },
 
-  devServer: {
-    host: 'localhost',
-    port: 8080
-  },
   /**
    * setDevServer local modification support
    * @type {string} host
    * @type {number} port
    */
-  setDevServer: function setDevServer(host, port) {
-    this.devServer.host = host || 'localhost';
-    this.devServer.port = port || 8080;
+  setDevServer: function(host, port) {
+    this.webpackOptions.devServer.host = host || 'localhost';
+    this.webpackOptions.devServer.port = port || 8080;
   },
 
   postcss: function() {

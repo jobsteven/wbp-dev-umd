@@ -9,6 +9,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var path = require('path');
 var pfs = require('promisify-fs');
 var fs = require('fs');
+var asar = require('asar');
 var Promise = require('bluebird');
 
 /**
@@ -37,7 +38,17 @@ module.exports = function main(params, options) {
     .then(function() {
       //devMode / proMode output
       if (options['d'] || options['developemnt'] || options['p'] || options['production']) {
-        return startWebpackCompiler();
+        return startWebpackCompiler().then(() => {
+          if (cx.umdConf.webpackFeatures.enableASAR) {
+            return Promise.fromCallback((cb) => {
+              asar.createPackage(cx.__builddir, cx.__buildASARdir, () => {
+                cb();
+              })
+            })
+          }
+        }).then(() => {
+          console.log('*************SUCCESS****************');
+        })
       }
 
       // live developemnt
@@ -71,15 +82,15 @@ function startDevServer() {
       key: fs.readFileSync(cx.__ssldir + '/key'),
       cert: fs.readFileSync(cx.__ssldir + '/cert')
     };
-    require('https').createServer(sslOptions, expressServer).listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function() {
-      cx.info('DevServer: ' + cx.umdConf.devServer.host + ':' + cx.umdConf.devServer.port + ' *ssl enabled*');
+    require('https').createServer(sslOptions, expressServer).listen(cx.webpackOptions.devServer.port, cx.webpackOptions.devServer.host, function() {
+      cx.info('DevServer: ' + cx.webpackOptions.devServer.host + ':' + cx.webpackOptions.devServer.port + ' *ssl enabled*');
     });
     return
   }
 
   // start dev server
-  return expressServer.listen(cx.umdConf.devServer.port, cx.umdConf.devServer.host, function() {
-    cx.info('DevServer: ' + cx.umdConf.devServer.host + ':' + cx.umdConf.devServer.port + ' ');
+  return expressServer.listen(cx.webpackOptions.devServer.port, cx.webpackOptions.devServer.host, function() {
+    cx.info('DevServer: ' + cx.webpackOptions.devServer.host + ':' + cx.webpackOptions.devServer.port + ' ');
   });
 }
 
@@ -105,24 +116,23 @@ function getWebpackCompiler(devMode) {
       cx.__sourcedir = cx.getCwdPath(umdConf.pkg.wbp.source || './src');
       cx.__testdir = cx.getCwdPath(umdConf.pkg.wbp.test || './test');
       cx.__builddir = cx.getCwdPath(umdConf.pkg.wbp.build || './dist');
+      cx.__buildASARdir = cx.__builddir + '/app.asar';
       cx.__ssldir = cx.getCwdPath(umdConf.pkg.wbp.ssl || './ssl');
       cx.__cwdDependencesDir = cx.__cwd + '/node_modules';
       cx.__homeDependenceDir = cx.__home + '/node_modules';
       cx.__pluginDependencesDir = cx.__plugin_dir + '/node_modules';
 
-      //default umd settings
+      umdConf.addPlugin(new webpack.DefinePlugin({ WBP_DEV: devMode }));
+
       if (devMode) {
         umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
       } else {
-        umdConf.addPlugin(new webpack.optimize.DedupePlugin());
-        umdConf.addPlugin(new webpack.HashedModuleIdsPlugin());
-        umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin(true));
+        // umdConf.addPlugin(new webpack.optimize.DedupePlugin());
+        // umdConf.addPlugin(new webpack.HashedModuleIdsPlugin());
+        // umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin(true));
         umdConf.addPlugin(new ExtractTextPlugin('[name]_[contenthash:7].css'));
+        umdConf.webpackFeatures.enableUglifyJs();
       }
-
-      // default features
-      umdConf.webpackFeatures.enableChuckHash();
-      umdConf.webpackFeatures.enableChuckHash();
 
       //Add Loaders Search Paths
       umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
@@ -133,16 +143,19 @@ function getWebpackCompiler(devMode) {
       umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, devMode));
       umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, devMode));
       umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx, devMode));
+
       // umdConf.addModuleLoader(webpackLoaders.getLESSLoader(cx));
       // umdConf.addModuleLoader(webpackLoaders.getSCSS_SRCLoader(cx, devMode));
       // umdConf.addModuleLoader(webpackLoaders.getSCSSLoader(cx));
       // umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx));
-      // umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx));
 
       //Add Module Search Paths
       umdConf.addModuleSearchPath(cx.__sourcedir);
-      umdConf.addModuleSearchPath(cx.__cwdDependencesDir);
+      umdConf.addModuleSearchPath('node_modules');
       umdConf.addModuleSearchPath(cx.__pluginDependencesDir);
+      // umdConf.addModuleSearchPath(cx.__cwdDependencesDir);
 
       //ResolveEntryModules
       // umdConf.setContext(cx.__sourcedir);
@@ -150,16 +163,40 @@ function getWebpackCompiler(devMode) {
       umdConf.setExportedName(umdConf.pkg.name);
       umdConf.setBuildPath(cx.__builddir);
 
+      // Local Webpack Settings -*****************
+      getLocalWebpackConfig(umdConf);
+
       //UMD Project Entries
       for (var key in umdConf.pkg.wbp.entries) {
         umdConf.addBundleEntry(key, umdConf.pkg.wbp.entries[key]);
+        if (umdConf.webpackOptions.target === 'web') {
+          umdConf.webpackFeatures.enableEntryHTML(key);
+          if (devMode) {
+            umdConf.webpackFeatures.enableEntryHot(key);
+          }
+        }
       }
 
-      // Local Webpack Settings
-      getLocalWebpackConfig(umdConf);
+      //default umd settings
+      if (umdConf.webpackOptions.target === 'web') {
+        umdConf.webpackFeatures.enableChuckHash();
+
+        if (devMode) {
+          umdConf.webpackFeatures.enableDevtool();
+        }
+
+        // last features
+        if (umdConf.webpackFeatures.enableOffline) {
+          umdConf.webpackFeatures.installOffline();
+        }
+      }
+
+      // webpack options is done
+      cx.webpackOptions = umdConf.webpackOptions;
 
       // Create Webpack Compiler
-      cx.webpackCompiler = webpack(umdConf);
+      cx.webpackCompiler = webpack(cx.webpackOptions);
+      cx.webpackCompiler.apply(new webpack.ProgressPlugin());
     })
 }
 
@@ -171,12 +208,14 @@ function getLocalWebpackConfig(umdConf) {
   var localWebpackConf = null;
   try {
     localWebpackConf = require(cx.__cwd + '/webpack.config.umd.js');
-  } catch (e) {}
+  } catch (e) {
+    console.log('ignore local webpack configuartion.');
+  }
   if (localWebpackConf && localWebpackConf instanceof Function) {
     try {
       localWebpackConf(umdConf, cx);
     } catch (e) {
-      cx.warn('Load local webpack config. error occurs.', e);
+      cx.warn('Load local webpack config. error occurs.' + e);
     }
   } else {
     cx.info('Ignore local webpack config. Does not exists or without exporting a function.');
@@ -191,8 +230,10 @@ function mountWebpackMiddles() {
   return Promise.try(function() {
     var webpackHotMiddleware = getWebpackHotMiddleware(cx.webpackCompiler);
     var webpackDevMiddleware = getWebpackDevMiddleware(cx.webpackCompiler, {
-      contentBase: cx.umdConf.output.path,
-      publicPath: cx.umdConf.output.publicPath,
+      contentBase: cx.webpackOptions.output.path,
+      publicPath: cx.webpackOptions.output.publicPath,
+      noInfo: false,
+      quiet: false,
       watchOptions: {
         aggregateTimeout: 100
       },
@@ -202,9 +243,9 @@ function mountWebpackMiddles() {
       }
     });
 
-    if (cx.umdConf.historyfallback) {
+    if (cx.umdConf.webpackFeatures.enableHistoryfallback) {
       expressServer.use((req, res, next) => {
-        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|svg)|hmr)/) && req.url !== '/') {
+        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg)|hmr)/) && req.url !== '/') {
           req.originalUrl = req.path = req.url = '/';
         }
         next();
@@ -213,7 +254,7 @@ function mountWebpackMiddles() {
 
     expressServer.use(webpackDevMiddleware);
     expressServer.use(webpackHotMiddleware);
-    expressServer.get('favicon.ico', function(req, res) {
+    expressServer.get('favicon.ico', (req, res) => {
       res.end();
     })
     expressServer.use(express.static(cx.__builddir));
