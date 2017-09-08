@@ -154,7 +154,7 @@ function getWebpackCompiler(devMode) {
       umdConf.addModuleSearchPath(cx.__sourcedir);
       umdConf.addModuleSearchPath('node_modules');
       umdConf.addModuleSearchPath(cx.__pluginDependencesDir);
-      umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
+      umdConf.addModuleSearchPath(cx.__homeDependenceDir);
 
       //ResolveEntryModules
       // umdConf.setContext(cx.__sourcedir);
