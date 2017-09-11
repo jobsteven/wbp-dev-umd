@@ -169,7 +169,9 @@ function getWebpackCompiler(devMode) {
       for (var key in umdConf.pkg.wbp.entries) {
         umdConf.addBundleEntry(key, umdConf.pkg.wbp.entries[key]);
         if (umdConf.webpackOptions.target === 'web') {
-          umdConf.webpackFeatures.enableEntryHTML(key);
+          if (umdConf.webpackFeatures.enableEntryHTML) {
+            umdConf.webpackFeatures.installEntryHTML(key);
+          }
           if (devMode) {
             umdConf.webpackFeatures.enableEntryHot(key);
           }
@@ -178,7 +180,10 @@ function getWebpackCompiler(devMode) {
 
       //default umd settings
       if (umdConf.webpackOptions.target === 'web') {
-        umdConf.webpackFeatures.enableChuckHash();
+
+        if (umdConf.webpackFeatures.enableChuckHash) {
+          umdConf.webpackFeatures.installChuckHash();
+        }
 
         if (devMode) {
           umdConf.webpackFeatures.enableDevtool();

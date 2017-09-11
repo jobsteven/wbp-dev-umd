@@ -35,7 +35,7 @@ module.exports = {
       loader: 'css-loader',
       options: {
         sourceMap: devMode,
-        modules: true,
+        modules: cx.umdConf.webpackFeatures.enableCSSModule,
         minimize: !devMode,
         localIdentName: '[local]_[hash:base64:5]'
       }
@@ -78,14 +78,6 @@ module.exports = {
       use
     }
   },
-
-  // getLESSLoader: function(cx) {
-  //   return {
-  //     test: /\.less$/,
-  //     // exclude: cx.__sourcedir,
-  //     loader: ExtractTextPlugin.extract('style-loader', ['css-loader?importLoaders=1&minimize', 'less-loader']),
-  //   }
-  // },
 
   getImgLoader: function(cx, devMode) {
     return {

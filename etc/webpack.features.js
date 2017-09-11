@@ -7,8 +7,9 @@ var webpack = require('webpack');
 
 module.exports = function(cx, umdConf) {
   return {
+    enableEntryHTML: false,
 
-    enableEntryHTML: function(entry, options) {
+    installEntryHTML: function(entry, options) {
       var mergeOptions = Object.assign({}, {
         filename: (entry || 'index') + '.html',
         template: cx.getCwdPath('./etc/umd.template.html'),
@@ -38,6 +39,8 @@ module.exports = function(cx, umdConf) {
     enableHistoryfallback: true,
 
     enableASAR: false,
+
+    enableCSSModule: false,
 
     enableEntryHot: function(entryName) {
       var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';
@@ -100,13 +103,10 @@ module.exports = function(cx, umdConf) {
       }
     },
 
-    enableChuckHash: function() {
+    enableChuckHash: false,
+
+    installChuckHash: function() {
       umdConf.webpackOptions.output.filename = '[name]' + (umdConf.devMode ? '' : '_[chunkhash:7]') + '.js';
-      // if (umdConf.devMode) {
-      //   umdConf.webpackOptions.output.filename = '[name].js';
-      // } else {
-      //   umdConf.webpackOptions.output.filename = '[id].js';
-      // }
     },
 
     enableNode: function(options, target) {
