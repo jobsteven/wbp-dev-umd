@@ -36,7 +36,7 @@ module.exports = function(cx, umdConf) {
       }))
     },
 
-    enableHistoryfallback: true,
+    enableHistoryfallback: false,
 
     enableASAR: false,
 
@@ -106,7 +106,10 @@ module.exports = function(cx, umdConf) {
     enableChuckHash: false,
 
     installChuckHash: function() {
-      umdConf.webpackOptions.output.filename = '[name]' + (umdConf.devMode ? '' : '_[chunkhash:7]') + '.js';
+      const chunkname = umdConf.webpackOptions.output.filename;
+      if (chunkname.indexOf('[name]') !== -1) {
+        umdConf.webpackOptions.output.filename = chunkname.replace('[name]', '[name]' + (umdConf.devMode ? '_[hash:7]' : '_[chunkhash:7]'));
+      }
     },
 
     enableNode: function(options, target) {

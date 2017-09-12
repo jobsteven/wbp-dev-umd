@@ -1,13 +1,10 @@
-/*eslint-disable*/
-/*WEBPACK COMMON LOADERS*/
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
-
   getJSLoader: function(cx, devMode) {
     return {
       test: /\.jsx?$/,
-      include: [cx.__sourcedir, cx.__testdir],
+      include: [cx.__sourcedir],
       use: [{
         loader: 'babel-loader',
         query: {
@@ -30,15 +27,38 @@ module.exports = {
     }
   },
 
-  getLESS_SRCLoader: function(cx, devMode) {
+  getCSSLoader: function(cx, devMode) {
     let use = [{
       loader: 'css-loader',
-      options: {
+      options: Object.assign({
         sourceMap: devMode,
-        modules: cx.umdConf.webpackFeatures.enableCSSModule,
         minimize: !devMode,
-        localIdentName: '[local]_[hash:base64:5]'
-      }
+        localIdentName: `[local]_[hash:base64:5]`,
+        modules: false,
+      }, cx.umdConf.webpackFeatures.enableCSSModule)
+    }];
+    if (devMode) {
+      use.unshift('style-loader');
+    } else {
+      use = ExtractTextPlugin.extract({
+        fallback: 'style-loader',
+        use
+      })
+    }
+    return { test: /\.css$/, use }
+  },
+
+  getLESS_SRCLoader: function(cx, devMode) {
+    console.log(cx.umdConf.webpackFeatures.enableCSSModule);
+
+    let use = [{
+      loader: 'css-loader',
+      options: Object.assign({
+        sourceMap: devMode,
+        minimize: !devMode,
+        localIdentName: '[local]_[hash:base64:5]',
+        modules: false,
+      }, cx.umdConf.webpackFeatures.enableCSSModule)
     }, {
       loader: 'postcss-loader',
       options: {
@@ -63,7 +83,6 @@ module.exports = {
         },
       },
     }]
-
     if (devMode) {
       use.unshift('style-loader');
     } else {
@@ -72,17 +91,14 @@ module.exports = {
         use
       })
     }
-
-    return {
-      test: /\.less$/,
-      use
-    }
+    return { test: /\.less$/, use }
   },
 
+  // 25k
   getImgLoader: function(cx, devMode) {
     return {
       test: /\.(jpe?g|png|svg|gif)$/i,
-      use: `url-loader?prefix=img&limit=25000&name=[name]${devMode?'':'_[hash:7]'}.[ext]`, //25k
+      use: `url-loader?prefix=img&limit=25000&name=[name]${devMode?'':'_[hash:7]'}.[ext]`,
     }
   },
 
@@ -94,37 +110,5 @@ module.exports = {
         name: `[name]${devMode?'':'_[hash:7]'}.[ext]`
       },
     }
-  },
-
-  // getSCSS_SRCLoader: function(cx, devMode) {
-  //   return {
-  //     test: /\.scss$/,
-  //     // include: cx.__sourcedir,
-  //     loader: devMode ? 'style-loader!css-loader?localIdentName=[[local]_[hash:base64:5]hash:base64:5]&camelCase&modules&importLoaders=1&minimize!postcss-loader?parser=postcss-scss' : ExtractTextPlugin.extract('style-loader', ['css-loader?camelCase&modules&importLoaders=1&minimize', 'postcss-loader?parser=postcss-scss']),
-  //   }
-  // },
-
-  getCSSLoader: function(cx, devMode) {
-    return {
-      test: /\.css$/,
-      use: devMode ? ['style-loader', {
-        loader: 'css-loader',
-        options: {
-          minimize: true
-        }
-      }] : ExtractTextPlugin.extract({
-        fallback: 'style-loader',
-        use: 'css-loader?minimize'
-      })
-    }
-  },
-
-  // getSCSSLoader: function(cx) {
-  //   return {
-  //     test: /\.scss$/,
-  //     // exclude: cx.__sourcedir,
-  //     loader: ExtractTextPlugin.extract('style-loader', ['css-loader?importLoaders=1&minimize', 'sass-loader']),
-  //   }
-  // }
-
+  }
 }

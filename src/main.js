@@ -130,25 +130,12 @@ function getWebpackCompiler(devMode) {
         // umdConf.addPlugin(new webpack.optimize.DedupePlugin());
         // umdConf.addPlugin(new webpack.HashedModuleIdsPlugin());
         // umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin(true));
-        umdConf.addPlugin(new ExtractTextPlugin('[name]_[contenthash:7].css'));
         umdConf.webpackFeatures.enableUglifyJs();
       }
 
       //Add Loaders Search Paths
       umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
       umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
-
-      // Add Module Loaders
-      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx, devMode));
-
-      // umdConf.addModuleLoader(webpackLoaders.getLESSLoader(cx));
-      // umdConf.addModuleLoader(webpackLoaders.getSCSS_SRCLoader(cx, devMode));
-      // umdConf.addModuleLoader(webpackLoaders.getSCSSLoader(cx));
-      // umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx));
 
       //Add Module Search Paths
       umdConf.addModuleSearchPath(cx.__sourcedir);
@@ -164,6 +151,13 @@ function getWebpackCompiler(devMode) {
 
       // Local Webpack Settings -*****************
       getLocalWebpackConfig(umdConf);
+
+      // Add Module Loaders
+      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, devMode));
 
       //UMD Project Entries
       for (var key in umdConf.pkg.wbp.entries) {
@@ -184,6 +178,8 @@ function getWebpackCompiler(devMode) {
         if (umdConf.webpackFeatures.enableChuckHash) {
           umdConf.webpackFeatures.installChuckHash();
         }
+
+        umdConf.addPlugin(new ExtractTextPlugin(`[name]${umdConf.webpackFeatures.enableChuckHash ? '_[contenthash:7]' : ''}.css`));
 
         if (devMode) {
           umdConf.webpackFeatures.enableDevtool();
@@ -232,9 +228,10 @@ function getLocalWebpackConfig(umdConf) {
  */
 function mountWebpackMiddles() {
   return Promise.try(function() {
+
     var webpackHotMiddleware = getWebpackHotMiddleware(cx.webpackCompiler);
     var webpackDevMiddleware = getWebpackDevMiddleware(cx.webpackCompiler, {
-      contentBase: cx.webpackOptions.output.path,
+      contentBase: cx.webpackOptions.devServer.contentBase,
       publicPath: cx.webpackOptions.output.publicPath,
       noInfo: false,
       quiet: false,
@@ -246,6 +243,8 @@ function mountWebpackMiddles() {
         colors: true
       }
     });
+
+    expressServer.use(express.static(cx.webpackOptions.devServer.contentBase || cx.__builddir));
 
     if (cx.umdConf.webpackFeatures.enableHistoryfallback) {
       expressServer.use((req, res, next) => {
@@ -261,6 +260,5 @@ function mountWebpackMiddles() {
     expressServer.get('favicon.ico', (req, res) => {
       res.end();
     })
-    expressServer.use(express.static(cx.__builddir));
   });
 }

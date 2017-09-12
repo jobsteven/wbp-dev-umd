@@ -80,6 +80,11 @@ module.exports = {
   setExportedName: function(libraryName) {
     this.webpackOptions.output.library = libraryName;
   },
+
+  setChuckFileName: function(chunkname) {
+    this.webpackOptions.output.filename = chunkname;
+  },
+
   /**
    * setBuildPath
    * @param {string} buildPath
@@ -127,11 +132,11 @@ module.exports = {
     this.webpackOptions.resolve.alias[alias] = source;
 
     if (noParse) {
-      this.webpackOptions.addModuleNoParse(source);
+      this.addModuleNoParse(source);
     }
 
     if (isVendor) {
-      this.webpackOptions.addVendor(source);
+      this.addVendor(source);
     }
   },
 
@@ -229,9 +234,10 @@ module.exports = {
    * @type {string} host
    * @type {number} port
    */
-  setDevServer: function(host, port) {
+  setDevServer: function(host, port, contentBase) {
     this.webpackOptions.devServer.host = host || 'localhost';
     this.webpackOptions.devServer.port = port || 8080;
+    this.webpackOptions.devServer.contentBase = contentBase || this.webpackOptions.output.path;
   },
 
   postcss: function() {
