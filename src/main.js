@@ -244,8 +244,6 @@ function mountWebpackMiddles() {
       }
     });
 
-    expressServer.use(express.static(cx.webpackOptions.devServer.contentBase || cx.__builddir));
-
     if (cx.umdConf.webpackFeatures.enableHistoryfallback) {
       expressServer.use((req, res, next) => {
         if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg)|hmr)/) && req.url !== '/') {
@@ -254,6 +252,8 @@ function mountWebpackMiddles() {
         next();
       })
     }
+
+    expressServer.use(express.static(cx.webpackOptions.devServer.contentBase || cx.__builddir));
 
     expressServer.use(webpackDevMiddleware);
     expressServer.use(webpackHotMiddleware);

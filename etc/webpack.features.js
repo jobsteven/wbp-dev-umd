@@ -36,7 +36,7 @@ module.exports = function(cx, umdConf) {
       }))
     },
 
-    enableHistoryfallback: false,
+    enableHistoryfallback: true,
 
     enableASAR: false,
 

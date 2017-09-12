@@ -35,7 +35,7 @@ module.exports = {
         minimize: !devMode,
         localIdentName: `[local]_[hash:base64:5]`,
         modules: false,
-      }, cx.umdConf.webpackFeatures.enableCSSModule)
+      })
     }];
     if (devMode) {
       use.unshift('style-loader');
