@@ -49,8 +49,6 @@ module.exports = {
   },
 
   getLESS_SRCLoader: function(cx, devMode) {
-    console.log(cx.umdConf.webpackFeatures.enableCSSModule);
-
     let use = [{
       loader: 'css-loader',
       options: Object.assign({

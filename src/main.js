@@ -41,7 +41,9 @@ module.exports = function main(params, options) {
         return startWebpackCompiler().then(() => {
           if (cx.umdConf.webpackFeatures.enableASAR) {
             return Promise.fromCallback((cb) => {
-              asar.createPackage(cx.__builddir, cx.__buildASARdir, () => {
+              const pkg_folder = cx.webpackOptions.devServer.contentBase || cx.__builddir;
+              const asar_file = `${cx.webpackOptions.context}/${cx.umdConf.pkg.name}.asar`;
+              asar.createPackage(pkg_folder, asar_file, () => {
                 cb();
               })
             })
@@ -116,7 +118,6 @@ function getWebpackCompiler(devMode) {
       cx.__sourcedir = cx.getCwdPath(umdConf.pkg.wbp.source || './src');
       cx.__testdir = cx.getCwdPath(umdConf.pkg.wbp.test || './test');
       cx.__builddir = cx.getCwdPath(umdConf.pkg.wbp.build || './dist');
-      cx.__buildASARdir = cx.__builddir + '/app.asar';
       cx.__ssldir = cx.getCwdPath(umdConf.pkg.wbp.ssl || './ssl');
       cx.__cwdDependencesDir = cx.__cwd + '/node_modules';
       cx.__homeDependenceDir = cx.__home + '/node_modules';
@@ -245,9 +246,10 @@ function mountWebpackMiddles() {
     });
 
     if (cx.umdConf.webpackFeatures.enableHistoryfallback) {
+      const publishRoot = cx.webpackOptions.output.publicPath;
       expressServer.use((req, res, next) => {
-        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg)|hmr)/) && req.url !== '/') {
-          req.originalUrl = req.path = req.url = '/';
+        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg)|hmr)/) && req.url !== publishRoot) {
+          req.originalUrl = req.path = req.url = publishRoot || '/';
         }
         next();
       })
