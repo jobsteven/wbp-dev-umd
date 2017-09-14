@@ -33,8 +33,8 @@ module.exports = {
       options: Object.assign({
         sourceMap: devMode,
         minimize: !devMode,
-        localIdentName: `[local]_[hash:base64:5]`,
         modules: false,
+        url: false
       })
     }];
     if (devMode) {
