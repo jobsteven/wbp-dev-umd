@@ -248,7 +248,7 @@ function mountWebpackMiddles() {
     if (cx.umdConf.webpackFeatures.enableHistoryfallback) {
       const publishRoot = cx.webpackOptions.output.publicPath;
       expressServer.use((req, res, next) => {
-        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg)|hmr)/) && req.url !== publishRoot) {
+        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg|ogg|mp3|wav|ttf)|hmr)/) && req.url !== publishRoot) {
           req.originalUrl = req.path = req.url = publishRoot || '/';
         }
         next();
