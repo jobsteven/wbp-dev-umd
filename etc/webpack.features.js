@@ -40,7 +40,7 @@ module.exports = function(cx, umdConf) {
 
     enableASAR: false,
 
-    enableCSSModule: false,
+    enableLESSModule: false,
 
     enableEntryHot: function(entryName) {
       var webpackHotClient = require.resolve('webpack-hot-middleware/client') + '?reload=true';

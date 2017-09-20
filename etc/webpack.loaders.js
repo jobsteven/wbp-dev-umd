@@ -56,7 +56,7 @@ module.exports = {
         minimize: !devMode,
         localIdentName: '[local]_[hash:base64:5]',
         modules: false,
-      }, cx.umdConf.webpackFeatures.enableCSSModule)
+      }, cx.umdConf.webpackFeatures.enableLESSModule)
     }, {
       loader: 'postcss-loader',
       options: {
