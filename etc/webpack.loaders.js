@@ -23,7 +23,7 @@ module.exports = {
             require.resolve('react-hot-loader/babel')
           ]
         }
-      }, 'webpack-module-hot-accept']
+      }]
     }
   },
 

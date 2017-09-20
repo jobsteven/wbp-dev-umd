@@ -128,9 +128,6 @@ function getWebpackCompiler(devMode) {
       if (devMode) {
         umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
       } else {
-        // umdConf.addPlugin(new webpack.optimize.DedupePlugin());
-        // umdConf.addPlugin(new webpack.HashedModuleIdsPlugin());
-        // umdConf.addPlugin(new webpack.optimize.OccurrenceOrderPlugin(true));
         umdConf.webpackFeatures.enableUglifyJs();
       }
 
