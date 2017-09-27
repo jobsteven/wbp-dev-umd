@@ -242,6 +242,7 @@ function mountWebpackMiddles() {
       }
     });
 
+    // dynamic / static
     if (cx.umdConf.webpackFeatures.enableHistoryfallback) {
       const publishRoot = cx.webpackOptions.output.publicPath;
       expressServer.use((req, res, next) => {
@@ -252,10 +253,11 @@ function mountWebpackMiddles() {
       })
     }
 
-    expressServer.use(express.static(cx.webpackOptions.devServer.contentBase || cx.__builddir));
-
     expressServer.use(webpackDevMiddleware);
     expressServer.use(webpackHotMiddleware);
+
+    // www
+    expressServer.use(express.static(cx.webpackOptions.devServer.contentBase || cx.__builddir));
     expressServer.get('favicon.ico', (req, res) => {
       res.end();
     })
