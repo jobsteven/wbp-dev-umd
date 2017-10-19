@@ -30,10 +30,20 @@ var context, cx;
 module.exports = function main(params, options) {
   context = cx = this;
   // development/production
-  var devMode = !(options['p'] || options['production']);
-  if (!devMode) {
+  // '' dev-debug
+  var devMode = '';
+
+  // false 生产输出
+  if (options['p'] || options['production']) {
+    devMode = false;
     process.env.NODE_ENV = 'production';
   }
+
+  // true 开发输出
+  if (options['d'] || options['developemnt']) {
+    devMode = true;
+  }
+
   return getWebpackCompiler(devMode)
     .then(function() {
       //devMode / proMode output
@@ -126,7 +136,9 @@ function getWebpackCompiler(devMode) {
       umdConf.addPlugin(new webpack.DefinePlugin({ WBP_DEV: devMode }));
 
       if (devMode) {
-        umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
+        if (devMode === '') {
+          umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
+        }
       } else {
         umdConf.webpackFeatures.enableUglifyJs();
       }
@@ -164,7 +176,7 @@ function getWebpackCompiler(devMode) {
           if (umdConf.webpackFeatures.enableEntryHTML) {
             umdConf.webpackFeatures.installEntryHTML(key);
           }
-          if (devMode) {
+          if (devMode === '') {
             umdConf.webpackFeatures.enableEntryHot(key);
           }
         }
