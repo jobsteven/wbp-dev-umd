@@ -31,17 +31,17 @@ module.exports = function main(params, options) {
   context = cx = this;
   // development/production
   // '' dev-debug
-  var devMode = '';
+  var devMode = 'DEBUG';
+
+  // true 开发输出
+  if (options['d'] || options['developemnt']) {
+    devMode = true;
+  }
 
   // false 生产输出
   if (options['p'] || options['production']) {
     devMode = false;
     process.env.NODE_ENV = 'production';
-  }
-
-  // true 开发输出
-  if (options['d'] || options['developemnt']) {
-    devMode = true;
   }
 
   return getWebpackCompiler(devMode)
@@ -134,9 +134,8 @@ function getWebpackCompiler(devMode) {
       cx.__pluginDependencesDir = cx.__plugin_dir + '/node_modules';
 
       umdConf.addPlugin(new webpack.DefinePlugin({ WBP_DEV: devMode }));
-
       if (devMode) {
-        if (devMode === '') {
+        if (devMode === 'DEBUG') {
           umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
         }
       } else {
@@ -163,11 +162,11 @@ function getWebpackCompiler(devMode) {
       getLocalWebpackConfig(umdConf);
 
       // Add Module Loaders
-      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx, devMode));
-      umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, devMode));
+      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, !!devMode));
+      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, !!devMode));
+      umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx, !!devMode));
+      umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx, !!devMode));
+      umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, !!devMode));
 
       //UMD Project Entries
       for (var key in umdConf.pkg.wbp.entries) {
@@ -176,7 +175,7 @@ function getWebpackCompiler(devMode) {
           if (umdConf.webpackFeatures.enableEntryHTML) {
             umdConf.webpackFeatures.installEntryHTML(key);
           }
-          if (devMode === '') {
+          if (devMode === 'DEBUG') {
             umdConf.webpackFeatures.enableEntryHot(key);
           }
         }
