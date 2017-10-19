@@ -133,7 +133,7 @@ function getWebpackCompiler(devMode) {
       cx.__homeDependenceDir = cx.__home + '/node_modules';
       cx.__pluginDependencesDir = cx.__plugin_dir + '/node_modules';
 
-      umdConf.addPlugin(new webpack.DefinePlugin({ WBP_DEV: devMode }));
+      umdConf.addPlugin(new webpack.DefinePlugin({ WBP_DEV: !!devMode }));
       if (devMode) {
         if (devMode === 'DEBUG') {
           umdConf.addPlugin(new webpack.HotModuleReplacementPlugin());
