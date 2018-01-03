@@ -143,14 +143,16 @@ function getWebpackCompiler(devMode) {
       }
 
       //Add Loaders Search Paths
-      umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
       umdConf.addLoaderSearchPath(cx.__homeDependenceDir);
+      umdConf.addLoaderSearchPath(cx.__pluginDependencesDir);
+      umdConf.addLoaderSearchPath('node_modules');
 
       //Add Module Search Paths
       umdConf.addModuleSearchPath(cx.__sourcedir);
-      umdConf.addModuleSearchPath('node_modules');
-      umdConf.addModuleSearchPath(cx.__pluginDependencesDir);
+      umdConf.addModuleSearchPath(cx.__cwdDependencesDir)
       umdConf.addModuleSearchPath(cx.__homeDependenceDir);
+      umdConf.addModuleSearchPath(cx.__pluginDependencesDir);
+      umdConf.addModuleSearchPath('node_modules');
 
       //ResolveEntryModules
       // umdConf.setContext(cx.__sourcedir);
@@ -257,7 +259,7 @@ function mountWebpackMiddles() {
     if (cx.umdConf.webpackFeatures.enableHistoryfallback) {
       const publishRoot = cx.webpackOptions.output.publicPath;
       expressServer.use((req, res, next) => {
-        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg|ogg|mp3|wav|ttf)|hmr)/) && req.url !== publishRoot) {
+        if (!req.url.match(/(\.(html|css|js|png|jpeg|jpg|woff|appcache|svg|ogg|mp3|wav|ttf|map)|hmr)/) && req.url !== publishRoot) {
           req.originalUrl = req.path = req.url = publishRoot || '/';
         }
         next();

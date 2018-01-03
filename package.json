@@ -49,16 +49,19 @@
     "offline-plugin": "^4.8.3",
     "postcss-flexbugs-fixes": "^3.2.0",
     "postcss-loader": "^2.0.6",
+    "preact": "8.2.7",
+    "preact-compat": "3.17.0",
     "promisify-fs": "^1.0.39",
+    "react": "16.2.0",
     "react-hot-loader": "next",
     "style-loader": "^0.18.2",
     "transform-runtime": "^0.0.0",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "url-loader": "^0.5.9",
-    "webpack": "^3.5.5",
-    "webpack-dev-middleware": "^1.12.0",
-    "webpack-hot-middleware": "^2.18.2",
-    "webpack-node-externals": "^1.6.0"
+    "webpack": "3.5.5",
+    "webpack-dev-middleware": "1.12.0",
+    "webpack-hot-middleware": "2.18.2",
+    "webpack-node-externals": "1.6.0"
   },
   "devDependencies": {}
 }
