@@ -4,6 +4,7 @@ var HTMLWebpackPlugin = require('html-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var OfflinePlugin = require('offline-plugin');
 var webpack = require('webpack');
+var VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = function(cx, umdConf) {
   return {
@@ -71,6 +72,8 @@ module.exports = function(cx, umdConf) {
 
       umdConf.addPlugin(new UglifyJSPlugin(mergeOptions));
     },
+
+    enableVue: true,
 
     enableVendors: function(options) {
       var mergeOptions = Object.assign({}, {

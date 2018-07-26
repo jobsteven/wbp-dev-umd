@@ -1,4 +1,5 @@
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
+var VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
   getJSLoader: function(cx, devMode) {
@@ -24,6 +25,16 @@ module.exports = {
           ]
         }
       }]
+    }
+  },
+
+  getVueLoader: function(cx, devMode) {
+    cx.umdConf.addPlugin(new VueLoaderPlugin())
+
+    return {
+      test: /\.vue$/,
+      include: [cx.__sourcedir],
+      loader: 'vue-loader'
     }
   },
 

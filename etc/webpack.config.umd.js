@@ -22,7 +22,7 @@ const webpackOptions = {
   },
 
   resolve: {
-    extensions: ['.js', '.jsx', '.css', '.scss', '.less'],
+    extensions: ['.js', '.jsx', '.vue', '.css', '.scss', '.less'],
     modules: [],
     alias: {}
   },
@@ -138,6 +138,12 @@ module.exports = {
     if (isVendor) {
       this.addVendor(source);
     }
+  },
+
+  addModuleExtention: function(ext) {
+    var exts = this.webpackOptions.resolve.extensions
+    var extIndex = exts.indexOf(ext)
+    if (extIndex == -1) exts.unshift(ext)
   },
 
   /**

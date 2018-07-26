@@ -164,11 +164,11 @@ function getWebpackCompiler(devMode) {
       getLocalWebpackConfig(umdConf);
 
       // Add Module Loaders
-      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, !!devMode));
-      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, !!devMode));
-      umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx, !!devMode));
-      umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx, !!devMode));
-      umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, !!devMode));
+      umdConf.addModuleLoader(webpackLoaders.getJSLoader(cx, !!devMode))
+      umdConf.addModuleLoader(webpackLoaders.getCSSLoader(cx, !!devMode))
+      umdConf.addModuleLoader(webpackLoaders.getFontLoader(cx, !!devMode))
+      umdConf.addModuleLoader(webpackLoaders.getImgLoader(cx, !!devMode))
+      umdConf.addModuleLoader(webpackLoaders.getLESS_SRCLoader(cx, !!devMode))
 
       //UMD Project Entries
       for (var key in umdConf.pkg.wbp.entries) {
@@ -194,6 +194,10 @@ function getWebpackCompiler(devMode) {
 
         if (devMode) {
           umdConf.webpackFeatures.enableDevtool();
+        }
+
+        if (umdConf.webpackFeatures.enableVue) {
+          umdConf.addModuleLoader(webpackLoaders.getVueLoader(cx, !!devMode))
         }
 
         // last features
