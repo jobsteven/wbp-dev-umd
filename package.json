@@ -49,6 +49,7 @@
     "url-loader": "^0.5.9",
 
     "react": "16.2.0",
+    "react-dom": "16.2.1",
     "react-hot-loader": "next",
 
     "babel-core": "6.25.0",
